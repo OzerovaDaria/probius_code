@@ -537,7 +537,7 @@ logging:
 
 # Linux high speed capture support
 af-packet:
-  - interface: eth1
+  - interface: ens4
     # Number of receive threads. "auto" uses the number of cores
     threads: auto
     # Default clusterid. AF_PACKET will load balance packets based on flow.
@@ -611,7 +611,7 @@ af-packet:
     # copy is complete. If 'ips' is set, the packet matching a 'drop' action
     # will not be copied.
     #copy-mode: ips
-    #copy-iface: eth2
+    #copy-iface: ens5
 
   # Put default values here. These will be used for an interface that is not
   # in the list above.

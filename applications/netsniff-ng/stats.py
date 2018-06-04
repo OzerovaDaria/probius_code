@@ -1,7 +1,5 @@
 #!/usr/bin/python
 
-# TODO: edit the absolute path for your environment
-
 import os
 import time
 

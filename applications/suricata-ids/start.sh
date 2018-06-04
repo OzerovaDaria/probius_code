@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sudo ethtool -K eth1 gro off
+sudo ethtool -K ens4 gro off
 
 sudo rm -f /usr/local/var/run/suricata.pid
 sudo rm -rf /usr/local/var/log/suricata/*
