@@ -7,7 +7,7 @@ sudo apt-get update
 sudo apt-get install -y build-essential
 
 # psutil
-sudo apt-get install -y python-dev python-pip python-psutil
+sudo dpkg -i python-psutil_1.2.1-1ubuntu2_amd64.deb
 
 # trace-cmd
 sudo apt-get install -y trace-cmd

@@ -216,8 +216,8 @@ def monitor_VNF(config, vnf):
 
     return
 
-# psutil 1.2.1
-def monitor_host_VNF_1_2_1(config, vnf):
+# psutil
+def monitor_host_VNF(config, vnf):
     vnf_stats = {}
 
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -309,101 +309,8 @@ def monitor_host_VNF_1_2_1(config, vnf):
 
     return
 
-# psutil 5.0.1
-def monitor_host_VNF_5_0_1(config, vnf):
-    vnf_stats = {}
-
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    #print "host-side " + vnf + " monitor starts: " + str(timestamp)
-
-    vnf_stats["pid"] = str(config[vnf]["pid"])
-
-    p = psutil.Process(config[vnf]["pid"])
-
-    # cpu_num
-    vnf_stats["cpu_num"] = str(len(p.cpu_affinity()))
-
-    # cpu_affinity
-    affinity = p.cpu_affinity()
-
-    vnf_stats["cpu_affinity"] = ""
-    for index in range(len(affinity)):
-        if vnf_stats["cpu_affinity"] == "":
-            vnf_stats["cpu_affinity"] = str(affinity[index])
-        else:
-            vnf_stats["cpu_affinity"] = vnf_stats["cpu_affinity"] + "," + str(affinity[index])
-
-    # cpu_percent
-    vnf_stats["cpu_percent"] = str(p.cpu_percent(interval=0.5))
-
-    first = False
-    if host_vnf_info[vnf]["time"] == 0.0:
-        first = True
-
-    tm = time.time()
-
-    # user_time, system_time
-    user_time, system_time, children_user, children_system = p.cpu_times()
-
-    if first == False:
-        vnf_stats["user_time"] = str((user_time - host_vnf_info[vnf]["user_time"]) / (tm - host_vnf_info[vnf]["time"]))
-        vnf_stats["system_time"] = str((system_time - host_vnf_info[vnf]["system_time"]) / (tm - host_vnf_info[vnf]["time"]))
-
-    host_vnf_info[vnf]["user_time"] = user_time
-    host_vnf_info[vnf]["system_time"] = system_time
-
-    # mem_percent
-    vnf_stats["mem_percent"] = str(p.memory_percent())
-
-    # total_mem, rss_mem
-    rss, vms, shared, text, lib, data, dirty = p.memory_info()
-
-    vnf_stats["total_mem"] = str(int(config[vnf]["mem"]) * 1.0)
-    vnf_stats["rss_mem"]  = str(rss / (1024. * 1024.))
-
-    # io counter
-    if os.getuid() == 0:
-        read_count, read_bytes, write_count, write_bytes = p.io_counters()
-
-        if first == False:
-            vnf_stats["read_count"] = str((read_count * 1.0 - host_vnf_info[vnf]["read_count"]) / (tm - host_vnf_info[vnf]["time"]))
-            vnf_stats["read_bytes"] = str((read_bytes * 1.0 - host_vnf_info[vnf]["read_bytes"]) / (tm - host_vnf_info[vnf]["time"]))
-            vnf_stats["write_count"] = str((write_count * 1.0 - host_vnf_info[vnf]["write_count"]) / (tm - host_vnf_info[vnf]["time"]))
-            vnf_stats["write_bytes"] = str((write_bytes * 1.0 - host_vnf_info[vnf]["write_bytes"]) / (tm - host_vnf_info[vnf]["time"]))
-
-        host_vnf_info[vnf]["read_count"] = read_count * 1.0
-        host_vnf_info[vnf]["read_bytes"] = read_bytes * 1.0
-        host_vnf_info[vnf]["write_count"] = write_count * 1.0
-        host_vnf_info[vnf]["write_bytes"] = write_bytes * 1.0
-    else:
-        vnf_stats["read_count"] = "0.0"
-        vnf_stats["read_bytes"] = "0.0"
-        vnf_stats["write_count"] = "0.0"
-        vnf_stats["write_bytes"] = "0.0"
-
-    # num_threads
-    vnf_stats["num_threads"] = str(p.num_threads() * 1.0)
-
-    # context switches
-    vol_ctx, invol_ctx = p.num_ctx_switches()
-
-    if first == False:
-        vnf_stats["vol_ctx"] = str((vol_ctx * 1.0 - host_vnf_info[vnf]["vol_ctx"]) / (tm - host_vnf_info[vnf]["time"]))
-        vnf_stats["invol_ctx"] = str((invol_ctx * 1.0 - host_vnf_info[vnf]["invol_ctx"]) / (tm - host_vnf_info[vnf]["time"]))
-
-    host_vnf_info[vnf]["vol_ctx"] = vol_ctx * 1.0
-    host_vnf_info[vnf]["invol_ctx"] = invol_ctx * 1.0
-
-    # insert vnf_info
-    if first == False:
-        database.host_VNF_info(vnf, timestamp, vnf_stats)
-
-    host_vnf_info[vnf]["time"] = tm
-
-    return
-
-# psutil 1.2.1
-def monitor_host_extra_1_2_1(config, extra):
+# psutil
+def monitor_host_extra(config, extra):
     ext_stats = {}
 
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -492,98 +399,8 @@ def monitor_host_extra_1_2_1(config, extra):
 
     return
 
-# psutil 5.0.1
-def monitor_host_extra_5_0_1(config, extra):
-    ext_stats = {}
-
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    #print "host-side " + extra["name"] + "(" + str(extra["pid"]) + ") monitor starts: " + str(timestamp)
-
-    ext_stats["name"] = extra["name"]
-
-    pid = extra["pid"]
-    ext_stats["pid"] = extra["pid"]
-
-    p = psutil.Process(pid)
-
-    # cpu_num
-    ext_stats["cpu_num"] = str(len(p.cpu_affinity()))
-
-    # cpu_affinity
-    affinity = p.cpu_affinity()
-
-    ext_stats["cpu_affinity"] = ""
-    for index in range(len(affinity)):
-        if ext_stats["cpu_affinity"] == "":
-            ext_stats["cpu_affinity"] = str(affinity[index])
-        else:
-            ext_stats["cpu_affinity"] = ext_stats["cpu_affinity"] + "," + str(affinity[index])
-
-    # cpu_percent
-    ext_stats["cpu_percent"] = str(p.cpu_percent(interval=0.5))
-
-    first = False
-    if host_ext_info[pid]["time"] == 0.0:
-        first = True
-
-    tm = time.time()
-
-    # user_time, system_time
-    user_time, system_time, children_user, children_system = p.cpu_times()
-
-    if first == False:
-        ext_stats["user_time"] = str((user_time - host_ext_info[pid]["user_time"]) / (tm - host_ext_info[pid]["time"]))
-        ext_stats["system_time"] = str((system_time - host_ext_info[pid]["system_time"]) / (tm - host_ext_info[pid]["time"]))
-
-    host_ext_info[pid]["user_time"] = user_time
-    host_ext_info[pid]["system_time"] = system_time
-
-    # mem_percent
-    ext_stats["mem_percent"] = str(p.memory_percent())
-
-    # io counter
-    if os.getuid() == 0:
-        read_count, read_bytes, write_count, write_bytes = p.io_counters()
-
-        if first == False:
-            ext_stats["read_count"] = str((read_count * 1.0 - host_ext_info[pid]["read_count"]) / (tm - host_ext_info[pid]["time"]))
-            ext_stats["read_bytes"] = str((read_bytes * 1.0 - host_ext_info[pid]["read_bytes"]) / (tm - host_ext_info[pid]["time"]))
-            ext_stats["write_count"] = str((write_count * 1.0 - host_ext_info[pid]["write_count"]) / (tm - host_ext_info[pid]["time"]))
-            ext_stats["write_bytes"] = str((write_bytes * 1.0 - host_ext_info[pid]["write_bytes"]) / (tm - host_ext_info[pid]["time"]))
-
-        host_ext_info[pid]["read_count"] = read_count * 1.0
-        host_ext_info[pid]["read_bytes"] = read_bytes * 1.0
-        host_ext_info[pid]["write_count"] = write_count * 1.0
-        host_ext_info[pid]["write_bytes"] = write_bytes * 1.0
-    else:
-        ext_stats["read_count"] = "0.0"
-        ext_stats["read_bytes"] = "0.0"
-        ext_stats["write_count"] = "0.0"
-        ext_stats["write_bytes"] = "0.0"
-
-    # num_threads
-    ext_stats["num_threads"] = str(p.num_threads() * 1.0)
-
-    # context switches
-    vol_ctx, invol_ctx = p.num_ctx_switches()
-
-    if first == False:
-        ext_stats["vol_ctx"] = str((vol_ctx * 1.0 - host_ext_info[pid]["vol_ctx"]) / (tm - host_ext_info[pid]["time"]))
-        ext_stats["invol_ctx"] = str((invol_ctx * 1.0 - host_ext_info[pid]["invol_ctx"]) / (tm - host_ext_info[pid]["time"]))
-
-    host_ext_info[pid]["vol_ctx"] = vol_ctx * 1.0
-    host_ext_info[pid]["invol_ctx"] = invol_ctx * 1.0
-
-    # insert ext_info
-    if first == False:
-        database.host_ext_info(timestamp, ext_stats)
-
-    host_ext_info[pid]["time"] = tm
-
-    return
-
-# psutil 1.2.1
-def monitor_host_1_2_1(profile):
+# psutil
+def monitor_host(profile):
     host_stats = {}
 
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -738,196 +555,22 @@ def monitor_host_1_2_1(profile):
 
     return
 
-# psutil 5.0.1
-def monitor_host_5_0_1(profile):
-    host_stats = {}
-
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    print "host monitor starts: " + str(timestamp)
-
-    first = False
-    if host_info["time"] == 0.0:
-        first = True
-
-    # cpu_percent
-    host_stats["cpu_percent"] = psutil.cpu_percent(interval=0.5)
-
-    tm = time.time()
-
-    # cpu_times
-    user, nice, system, idle, iowait, irq, softirq, steal, guest, guest_nice = psutil.cpu_times()
-
-    if first == False:
-        host_stats["user_time"] = str((user - host_info["user_time"]) / (tm - host_info["time"]))
-        host_stats["nice_time"] = str((nice - host_info["nice_time"]) / (tm - host_info["time"]))
-        host_stats["system_time"] = str((system - host_info["system_time"]) / (tm - host_info["time"]))
-        host_stats["idle_time"] = str((idle - host_info["idle_time"]) / (tm - host_info["time"]))
-        host_stats["iowait_time"] = str((iowait - host_info["iowait_time"]) / (tm - host_info["time"]))
-        host_stats["irq_time"] = str((irq - host_info["irq_time"]) / (tm - host_info["time"]))
-        host_stats["softirq_time"] = str((softirq - host_info["softirq_time"]) / (tm - host_info["time"]))
-        host_stats["steal_time"] = str((steal - host_info["steal_time"]) / (tm - host_info["time"]))
-        host_stats["guest_time"] = str((guest - host_info["guest_time"]) / (tm - host_info["time"]))
-        host_stats["guest_nice_time"] = str((guest_nice - host_info["guest_nice_time"]) / (tm - host_info["time"]))
-
-    host_info["user_time"] = user
-    host_info["nice_time"] = nice
-    host_info["system_time"] = system
-    host_info["idle_time"] = idle
-    host_info["iowait_time"] = iowait
-    host_info["irq_time"] = irq
-    host_info["softirq_time"] = softirq
-    host_info["steal_time"] = steal
-    host_info["guest_time"] = guest
-    host_info["guest_nice_time"] = guest_nice
-
-    # mem_percent, total_mem, used_mem, available_mem
-    total_mem, available_mem, mem_percent, used_mem, free_mem, \
-        active_mem, inactive_mem, buffers_mem, cached_mem, shared_mem = psutil.virtual_memory()
-
-    host_stats["mem_percent"] = str(mem_percent)
-
-    host_stats["total_mem"] = str(total_mem / (1024. * 1024.))
-    host_stats["available_mem"] = str(available_mem / (1024. * 1024.))
-    host_stats["used_mem"] = str(used_mem / (1024. * 1024.))
-    host_stats["free_mem"] = str(free_mem / (1024. * 1024.))
-    host_stats["active_mem"] = str(active_mem / (1024. * 1024.))
-    host_stats["inactive_mem"] = str(inactive_mem / (1024. * 1024.))
-    host_stats["buffers_mem"] = str(buffers_mem / (1024. * 1024.))
-    host_stats["cached_mem"] = str(cached_mem / (1024. * 1024.))
-
-    read_count, write_count, read_bytes, write_bytes, read_time, write_time, \
-        read_merged_count, write_merged_count, busy_time = psutil.disk_io_counters()
-
-    if first == False:
-        host_stats["read_count"] = str((read_count * 1.0 - host_info["read_count"]) / (tm - host_info["time"]))
-        host_stats["read_bytes"] = str((read_bytes * 1.0 - host_info["read_bytes"]) / (tm - host_info["time"]))
-        host_stats["write_count"] = str((write_count * 1.0 - host_info["write_count"]) / (tm - host_info["time"]))
-        host_stats["write_bytes"] = str((write_bytes * 1.0 - host_info["write_bytes"]) / (tm - host_info["time"]))
-
-    host_info["read_count"] = read_count * 1.0
-    host_info["read_bytes"] = read_bytes * 1.0
-    host_info["write_count"] = write_count * 1.0
-    host_info["write_bytes"] = write_bytes * 1.0
-
-    if first == False:
-        database.host_info(timestamp, host_stats)
-
-    interfaces = psutil.net_io_counters(pernic=True)
-    for interface in interfaces:
-        host_nets = {}
-
-        if interface == profile["inbound"] or interface == profile["outbound"]:
-            bytes_sent, bytes_recv, packets_sent, packets_recv, \
-                errin, errout, dropin, dropout = interfaces[interface]
-
-            if interface in host_nic:
-                host_nets["interface"] = interface
-                host_nets["packets_recv"] = str(((packets_recv - host_nic[interface]["packets_recv"]) * 1.0) \
-                                                  / (tm - host_info["time"]))
-                host_nets["bytes_recv"] = str(((bytes_recv - host_nic[interface]["bytes_recv"]) * 1.0) \
-                                                  / (tm - host_info["time"]))
-                host_nets["packets_sent"] = str(((packets_sent - host_nic[interface]["packets_sent"]) * 1.0) \
-                                                  / (tm - host_info["time"]))
-                host_nets["bytes_sent"] = str(((bytes_sent - host_nic[interface]["bytes_sent"]) * 1.0) \
-                                                  / (tm - host_info["time"]))
-            else:
-                host_nic[interface] = {}
-
-            host_nic[interface]["packets_recv"] = packets_recv
-            host_nic[interface]["bytes_recv"] = bytes_recv
-            host_nic[interface]["packets_sent"] = packets_sent
-            host_nic[interface]["bytes_sent"] = bytes_sent
-
-            if "interface" in host_nets:
-                database.host_net(timestamp, host_nets)
-
-        elif "vnet" in interface:
-            bytes_sent, bytes_recv, packets_sent, packets_recv, \
-                errin, errout, dropin, dropout = interfaces[interface]
-
-            if interface in host_nic:
-                host_nets["interface"] = interface
-                host_nets["packets_recv"] = str(((packets_recv - host_nic[interface]["packets_recv"]) * 1.0) \
-                                                  / (tm - host_info["time"]))
-                host_nets["bytes_recv"] = str(((bytes_recv - host_nic[interface]["bytes_recv"]) * 1.0) \
-                                                  / (tm - host_info["time"]))
-                host_nets["packets_sent"] = str(((packets_sent - host_nic[interface]["packets_sent"]) * 1.0) \
-                                                  / (tm - host_info["time"]))
-                host_nets["bytes_sent"] = str(((bytes_sent - host_nic[interface]["bytes_sent"]) * 1.0) \
-                                                  / (tm - host_info["time"]))
-            else:
-                host_nic[interface] = {}
-
-            host_nic[interface]["packets_recv"] = packets_recv
-            host_nic[interface]["bytes_recv"] = bytes_recv
-            host_nic[interface]["packets_sent"] = packets_sent
-            host_nic[interface]["bytes_sent"] = bytes_sent
-
-            if "interface" in host_nets:
-                database.host_net(timestamp, host_nets)
-
-        elif "tap" in interface:
-            bytes_sent, bytes_recv, packets_sent, packets_recv, \
-                errin, errout, dropin, dropout = interfaces[interface]
-
-            if interface in host_nic:
-                host_nets["interface"] = interface
-                host_nets["packets_recv"] = str(((packets_recv - host_nic[interface]["packets_recv"]) * 1.0) \
-                                                  / (tm - host_info["time"]))
-                host_nets["bytes_recv"] = str(((bytes_recv - host_nic[interface]["bytes_recv"]) * 1.0) \
-                                                  / (tm - host_info["time"]))
-                host_nets["packets_sent"] = str(((packets_sent - host_nic[interface]["packets_sent"]) * 1.0) \
-                                                  / (tm - host_info["time"]))
-                host_nets["bytes_sent"] = str(((bytes_sent - host_nic[interface]["bytes_sent"]) * 1.0) \
-                                                  / (tm - host_info["time"]))
-            else:
-                host_nic[interface] = {}
-
-            host_nic[interface]["packets_recv"] = packets_recv
-            host_nic[interface]["bytes_recv"] = bytes_recv
-            host_nic[interface]["packets_sent"] = packets_sent
-            host_nic[interface]["bytes_sent"] = bytes_sent
-
-            if "interface" in host_nets:
-                database.host_net(timestamp, host_nets)
-
-    host_info["time"] = tm
-
-    return
-
 def create_monitor_threads_per_VNF(profile, config, VNFs, extras):
     threads = []
 
-    psutil_version = util.get_psutil_version()
+    # host monitor
+    t = threading.Thread(target=monitor_host, args=(profile,))
+    threads.append(t)
 
-    if psutil_version == "1.2.1":
-        # host monitor
-        t = threading.Thread(target=monitor_host_1_2_1, args=(profile,))
+    # host-side VNF monitor
+    for vnf in VNFs:
+        t = threading.Thread(target=monitor_host_VNF, args=(config, vnf,))
         threads.append(t)
 
-        # host-side VNF monitor
-        for vnf in VNFs:
-            t = threading.Thread(target=monitor_host_VNF_1_2_1, args=(config, vnf,))
-            threads.append(t)
-
-        # host-side extra monitor
-        for extra in extras:
-            t = threading.Thread(target=monitor_host_extra_1_2_1, args=(config, extra,))
-            threads.append(t)
-    elif psutil_version == "5.0.1":
-        # host monitor
-        t = threading.Thread(target=monitor_host_5_0_1, args=(profile,))
+    # host-side extra monitor
+    for extra in extras:
+        t = threading.Thread(target=monitor_host_extra, args=(config, extra,))
         threads.append(t)
-
-        # host-side VNF monitor
-        for vnf in VNFs:
-            t = threading.Thread(target=monitor_host_VNF_5_0_1, args=(config, vnf,))
-            threads.append(t)
-
-        # host-side extra monitor
-        for extra in extras:
-            t = threading.Thread(target=monitor_host_extra_5_0_1, args=(config, extra,))
-            threads.append(t)
 
     # guest-side VNF monitor
     for vnf in VNFs:

@@ -197,7 +197,7 @@ def send_workloads(analysis, config, VNFs, flag):
 
             # ============ #
 
-            if vnf_mgmt.is_openstack_env() == False: # openstack or kvm
+            if vnf_mgmt.is_openstack_env() == False: # kvm
                 vnf_mgmt.stop_applications_in_VNFs(config, VNFs)
                 print "Terminated applications in VNFs"
 

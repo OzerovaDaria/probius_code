@@ -15,8 +15,6 @@ tids = {}
 def run_trace(trace_time):
     tids.clear()
 
-    psutil_version = util.get_psutil_version()
-
     for process in psutil.process_iter():
         try:
             ps = process.as_dict(attrs=['name', 'pid'])

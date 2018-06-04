@@ -10,21 +10,27 @@
 - The service chain policies: config/policy.conf  
 
 # Test environment
-- The current Barista is fully tested on Ubuntu 14.04/16.04.  
+- The current Probius is fully tested on Ubuntu 16.04.  
 - It may work on other Linux platforms if its dependency issues are solved.  
 
+# Requirement
+- Psutil version = 1.2.1  
+
 # Compilation
-1. Move to the setup directory  
-$ cd kvm  
-2. Install dependencies (ubuntu 14.04/16.04)  
-$ ./deps_ubuntu(14/16).sh  
-3. Install KVM and Open vSwitch  
+1. Get the source codes of Probius  
+$ cd ~  
+$ git clone https://github.com/sdx4u/probius  
+2. Move to the setup directory  
+$ cd ~/probius/kvm  
+3. Install dependencies  
+$ ./deps_ubuntu16.sh  
+4. Install KVM and Open vSwitch  
 $ ./install.sh  
-4. Reboot  
+5. Reboot  
 $ sudo reboot  
-5. Move to the setup directory again  
-$ cd kvm  
-6. Configure KVM networks (Management network: 192.168.254.0/24)  
+6. Move to the setup directory again  
+$ cd ~/probius/kvm  
+7. Configure KVM networks (Management network: 192.168.254.0/24)  
 $ ./configure.sh  
 
 # Execution
