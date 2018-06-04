@@ -2,8 +2,8 @@
 
 import os
 import time
-from datetime import datetime
 import threading
+from datetime import datetime
 
 import trace
 import monitor
@@ -16,7 +16,7 @@ def start_sender(analysis, VNFs, protocol, bandwidth):
     if "atto-vrouter-minimum-2-port-1" in VNFs or "NAT" in VNFs:
         print "Destination IP: " + analysis["local_receiver_nat_ip"]
         option = option + analysis["local_receiver_nat_ip"]
-    else:
+    else: # openstack or kvm
         print "Destination IP: " + analysis["local_receiver_ip"]
         option = option + analysis["local_receiver_ip"]
 
@@ -28,7 +28,7 @@ def start_sender(analysis, VNFs, protocol, bandwidth):
 
     if "atto-vrouter-minimum-2-port-1" in VNFs or "NAT" in VNFs:
         os.system("ssh " + analysis["sender"] + " " + analysis["run_sender"] + " NAT " + option)
-    else:
+    else: # openstack or kvm
         os.system("ssh " + analysis["sender"] + " " + analysis["run_sender"] + " " + option)
 
     return
@@ -36,7 +36,7 @@ def start_sender(analysis, VNFs, protocol, bandwidth):
 def stop_sender(analysis, VNFs):
     if "atto-vrouter-minimum-2-port-1" in VNFs or "NAT" in VNFs:
         os.system("ssh " + analysis["sender"] + " " + analysis["stop_sender"] + " NAT")
-    else:
+    else: # openstack or kvm
         os.system("ssh " + analysis["sender"] + " " + analysis["stop_sender"])
 
     return
@@ -44,7 +44,7 @@ def stop_sender(analysis, VNFs):
 def start_receiver(analysis, VNFs):
     if "atto-vrouter-minimum-2-port-1" in VNFs or "NAT" in VNFs:
         os.system("ssh " + analysis["receiver"] + " " + analysis["run_receiver"] + " NAT")
-    else:
+    else: # openstack or kvm
         os.system("ssh " + analysis["receiver"] + " " + analysis["run_receiver"])
 
     return
@@ -52,7 +52,7 @@ def start_receiver(analysis, VNFs):
 def stop_receiver(analysis, VNFs):
     if "atto-vrouter-minimum-2-port-1" in VNFs or "NAT" in VNFs:
         os.system("ssh " + analysis["receiver"] + " " + analysis["stop_receiver"] + " NAT")
-    else:
+    else: # openstack or kvm
         os.system("ssh " + analysis["receiver"] + " " + analysis["stop_receiver"])
 
     return
@@ -61,7 +61,7 @@ def stop_sender_and_receiver(analysis, VNFs):
     if "atto-vrouter-minimum-2-port-1" in VNFs or "NAT" in VNFs:
         os.system("ssh " + analysis["sender"] + " " + analysis["stop_sender"] + " NAT")
         os.system("ssh " + analysis["receiver"] + " " + analysis["stop_receiver"] + " NAT")
-    else:
+    else: # openstack or kvm
         os.system("ssh " + analysis["sender"] + " " + analysis["stop_sender"])
         os.system("ssh " + analysis["receiver"] + " " + analysis["stop_receiver"])
 
@@ -74,13 +74,13 @@ def measure_latency(analysis, VNFs, flag):
 
     if "atto-vrouter-minimum-2-port-1" in VNFs or "NAT" in VNFs:
         os.system("ssh " + analysis["sender"] + " ping -c 1 " + analysis["local_receiver_nat_ip"] + " > /dev/null")
-    else:
+    else: # openstack or kvm
         os.system("ssh " + analysis["sender"] + " ping -c 1 " + analysis["local_receiver_ip"] + " > /dev/null")
 
     if "atto-vrouter-minimum-2-port-1" in VNFs or "NAT" in VNFs:
         os.system("ssh " + analysis["sender"] + " " + analysis["measure_latency"] + " " + analysis["local_receiver_nat_ip"] + \
                   " | tee " + LATENCY_LOG)
-    else:
+    else: # openstack or kvm
         os.system("ssh " + analysis["sender"] + " " + analysis["measure_latency"] + " " + analysis["local_receiver_ip"] + \
                   " | tee " + LATENCY_LOG)
 
@@ -92,9 +92,9 @@ def measure_latency(analysis, VNFs, flag):
         temp = data.split()
 
         if len(temp) >= 8:
-            if flag == False:
+            if flag == False: # without background traffic
                 database.add_latency(timestamp, VNFs, "wo", temp[7])
-            else:
+            else: # with background traffic
                 database.add_latency(timestamp, VNFs, "wt", temp[7])
 
     os.system("rm " + LATENCY_LOG)
@@ -115,7 +115,7 @@ def send_workloads(analysis, config, VNFs, flag):
 
             # ============ #
 
-            if vnf_mgmt.is_openstack_env() == False:
+            if vnf_mgmt.is_openstack_env() == False: # kvm
                 vnf_mgmt.initialize_Open_vSwitch(analysis)
                 print "Initialized Open vSwitch"
 
@@ -163,14 +163,15 @@ def send_workloads(analysis, config, VNFs, flag):
             print "Measured end-to-end latencies with workloads"
 
             monitor.monitor_VNFs(analysis, config, VNFs, extras, monitor_time)
-            while True:
+
+            while True: # waiting until all monitoring threads are terminated
                 if threading.active_count() == 1:
                     break
                 else:
                     time.sleep(1.0)
             print "Stopped monitoring VNFs"
 
-            if vnf_mgmt.is_athene_env() == False:
+            if vnf_mgmt.is_athene_env() == False: # openstack or kvm
                 vnf_mgmt.get_application_stats_of_VNFs(config, VNFs)
                 print "Got the statistics of passive VNFs"
 
@@ -196,7 +197,7 @@ def send_workloads(analysis, config, VNFs, flag):
 
             # ============ #
 
-            if vnf_mgmt.is_openstack_env() == False:
+            if vnf_mgmt.is_openstack_env() == False: # openstack or kvm
                 vnf_mgmt.stop_applications_in_VNFs(config, VNFs)
                 print "Terminated applications in VNFs"
 

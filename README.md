@@ -15,16 +15,16 @@
 
 # Compilation
 1. Move to the setup directory  
-$ cd setup  
+$ cd kvm  
 2. Install dependencies (ubuntu 14.04/16.04)  
-$ ./deps_ubuntu14.sh or ./deps_ubuntu16.sh  
+$ ./deps_ubuntu(14/16).sh  
 3. Install KVM and Open vSwitch  
 $ ./install.sh  
 4. Reboot  
 $ sudo reboot  
 5. Move to the setup directory again  
-$ cd setup  
-6. Configure KVM networks  
+$ cd kvm  
+6. Configure KVM networks (Management network: 192.168.254.0/24)  
 $ ./configure.sh  
 
 # Execution

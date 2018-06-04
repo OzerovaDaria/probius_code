@@ -1,5 +1,16 @@
 #!/bin/bash
 
+if [ -z $3 ]
+then
+        echo "Usage: $0 [VNF name] [vCPU set (a-b / a,b)] [# of vCPUs]"
+elif [ -z $2 ]
+then
+        echo "Usage: $0 [VNF name] [vCPU set (a-b / a,b)] [# of vCPUs]"
+elif [ -z $1 ]
+then
+        echo "Usage: $0 [VNF name] [vCPU set (a-b / a,b)] [# of vCPUs]"
+fi
+
 LINE=`sudo grep -n vcpu /etc/libvirt/qemu/$1.xml | awk -F':' '{print $1}'`
 HEAD=`expr $LINE - 1`
 NEW="  <vcpu placement='static' cpuset='$2'>$3</vcpu>"

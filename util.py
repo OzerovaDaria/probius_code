@@ -3,11 +3,12 @@
 import math
 import subprocess
 import numpy as np
+import statsmodels.api as sm
 
-try:
-    import statsmodels.api as sm
-except ImportError:
-    pass
+#try:
+#    import statsmodels.api as sm
+#except ImportError:
+#    pass
 
 # Statistics #
 

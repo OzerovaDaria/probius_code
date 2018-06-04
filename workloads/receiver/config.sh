@@ -1,8 +1,6 @@
 #!/bin/bash
 
-# TODO: edit the name of a target interface and the IP addresses for workload generators
-
-INTERFACE="p10p1"
+INTERFACE="enp12s0"
 IP_ADDR=`ifconfig $INTERFACE | grep "inet addr" | awk '{print $2}' | awk -F":" '{print $2}'`
 
 SENDER_NET="192.168.10.0"

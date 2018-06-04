@@ -36,17 +36,10 @@ def run_trace(trace_time):
             continue
 
         p = psutil.Process(ps['pid'])
-
-        if psutil_version == "1.2.1":
-            threads = p.get_threads()
-            for thread in threads:
-                tid, user_time, system_time = thread
-                tids[str(tid)] = str(ps['pid'])
-        elif psutil_version == "5.0.1":
-            threads = p.threads()
-            for thread in threads:
-                tid, user_time, system_time = thread
-                tids[str(tid)] = str(ps['pid'])
+        threads = p.get_threads()
+        for thread in threads:
+            tid, user_time, system_time = thread
+            tids[str(tid)] = str(ps['pid'])
 
     events = "-e kvm:*"
     os.system("sudo trace-cmd record " + events + " sleep " + str(trace_time) + " > /dev/null")

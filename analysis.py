@@ -54,24 +54,24 @@ runmode = ""
 num_VNFs = 0
 list_VNFs = ""
 
-if vnf_mgmt.is_athene_env() == True or vnf_mgmt.is_openstack_env() == True:
-    if len(sys.argv) == 2:
+if vnf_mgmt.is_athene_env() == True or vnf_mgmt.is_openstack_env() == True: # Athene or openstack
+    if len(sys.argv) == 2: # only 'case' option is available
         runmode = "case"
         list_VNFs = sys.argv[1]
     else:
         print "%s { [list of VNFs(,)] }" % sys.argv[0]
         exit(0)
-else: # KVM environment
+else: # kvm
     if len(sys.argv) == 2:
         runmode = sys.argv[1]
-        if runmode != "vnf":
+        if runmode != "vnf": # measure single VNF cases
             print "%s { vnf | sc [# of VNFs] | case [list of VNFs(,)] }" % sys.argv[0]
             exit(0)
     elif len(sys.argv) == 3:
         runmode = sys.argv[1]
-        if runmode == "sc":
+        if runmode == "sc": # set the number of VNFs to chain
             num_VNFs = int(sys.argv[2])
-        elif runmode == "case":
+        elif runmode == "case": # measure a specific service chain
             list_VNFs = sys.argv[2]
         else:
             print "%s { vnf | sc [# of VNFs] | case [list of VNFs(,)] }" % sys.argv[0]
@@ -84,7 +84,7 @@ else: # KVM environment
 database.initialize_database()
 print "Initialized the Probius database"
 
-if vnf_mgmt.is_athene_env() == True:
+if vnf_mgmt.is_athene_env() == True: # Athene
     # load analysis configurations
     analysis = load_analysis_configurations("config/analysis_athene.conf")
     print "Loaded analysis configurations"
@@ -104,7 +104,7 @@ if vnf_mgmt.is_athene_env() == True:
     # load VNF chaining policies
     policies = []
 
-elif vnf_mgmt.is_openstack_env() == True:
+elif vnf_mgmt.is_openstack_env() == True: # openstack
     # load analysis configurations
     analysis = load_analysis_configurations("config/analysis_openstack.conf")
     print "Loaded analysis configurations"
@@ -124,7 +124,7 @@ elif vnf_mgmt.is_openstack_env() == True:
     # load VNF chaining policies
     policies = []
 
-else: # KVM environment
+else: # kvm
     # load analysis configurations
     analysis = load_analysis_configurations("config/analysis.conf")
     print "Loaded analysis configurations"
@@ -242,11 +242,11 @@ elif runmode == "case":
 
     print "Current testcase: ", case
 
-    if vnf_mgmt.is_athene_env() == True or vnf_mgmt.is_openstack_env() == True:
+    if vnf_mgmt.is_athene_env() == True or vnf_mgmt.is_openstack_env() == True: # Athene or openstack
         if debug == False:
             # send workload (run monitor and trace)
             workload.send_workloads(analysis, config, case, trace_state_transitions)
-    else:
+    else: # kvm
         # make the resources of VNFs
         cpus, mems = vnf_mgmt.make_resources_VNFs(analysis, config, case, no_resource_constraint)
 

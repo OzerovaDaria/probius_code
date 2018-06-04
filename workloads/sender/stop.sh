@@ -1,6 +1,7 @@
 #!/bin/bash
 
-. ./config.sh
+DIRECTORY=`dirname $0`
+. $DIRECTORY/config.sh
 
 sudo pkill -9 iperf3 2> /dev/null
 

@@ -1,5 +1,13 @@
 #!/bin/bash
 
+if [ -z $2 ]
+then
+	echo "Usage: $0 [VNF name] [memory size (KB)]"
+elif [ -z $1 ]
+then
+	echo "Usage: $0 [VNF name] [memory size (KB)]"
+fi
+
 LINE=`sudo grep -n memory /etc/libvirt/qemu/$1.xml | awk -F':' '{print $1}'`
 HEAD=`expr $LINE - 1`
 

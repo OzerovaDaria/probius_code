@@ -1,6 +1,7 @@
 #!/bin/bash
 
-. ./config.sh
+DIRECTORY=`dirname $0`
+. $DIRECTORY/config.sh
 
 if [ "$IP_ADDR" != "$SENDER_IP" ]
 then

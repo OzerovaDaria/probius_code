@@ -10,13 +10,13 @@ from datetime import datetime
 
 import database
 
-def is_athene_env():
+def is_athene_env(): # Athene from ATTO Research
     if os.path.exists("/usr/lib/systemd/system/athene-ics-server.service") == True:
         return True
     else:
         return False
 
-def is_openstack_env():
+def is_openstack_env(): # openstack
     if os.path.exists("/usr/bin/openstack") == True:
         return True
     else:
@@ -31,8 +31,8 @@ def load_VNF_configurations(conf_file):
         for name in data:
             config[name] = {}
 
-            config[name]["name"] = str(name) # VNF name
-            config[name]["instance"] = ""
+            config[name]["name"] = str(name) # VNF name in a configuration
+            config[name]["instance"] = "" # VNF name in a NFV platform
 
             config[name]["type"] = str(data[name]["type"]) # passive or inline
 
@@ -53,9 +53,7 @@ def load_VNF_configurations(conf_file):
 
             config[name]["start"] = str(data[name]["start"]) # application start script
             config[name]["stop"] = str(data[name]["stop"]) # application stop script
-
-            if config[name]["type"] == "passive":
-                config[name]["stat"] = str(data[name]["stat"]) # application stat script
+            config[name]["stat"] = str(data[name]["stat"]) # application stat script (for passive VNFs)
 
             config[name]["init"] = str(data[name]["init"]) # VNF init script before/without NAT
             config[name]["nat_init"] = str(data[name]["nat_init"]) # VNF init script after NAT
@@ -76,7 +74,7 @@ def update_VNF_configurations(config):
 
                 uuid = vnf['cmdline'][vnf['cmdline'].index('-uuid') + 1]
 
-                if is_athene_env() == True:
+                if is_athene_env() == True: # Athene
                     temp = vnf['cmdline'][vnf['cmdline'].index('-name') + 1]
                     temp = temp.replace(",", "=")
                     temp = temp.split("=")
@@ -96,7 +94,7 @@ def update_VNF_configurations(config):
                     res = res.split("=")
 
                     config[name]["mgmt_ip"] = config[name]["mgmt_ip"].replace("unknown", res[1])
-                elif is_openstack_env() == True:
+                elif is_openstack_env() == True: # openstack
                     temp = vnf['cmdline'][vnf['cmdline'].index('-name') + 1]
                     temp = temp.replace(",", "=")
                     temp = temp.split("=")
@@ -116,7 +114,7 @@ def update_VNF_configurations(config):
                     res = res.split("=")
 
                     config[name]["mgmt_ip"] = config[name]["mgmt_ip"].replace("unknown", res[1])
-                else:
+                else: # kvm
                     instance = vnf['cmdline'][vnf['cmdline'].index('-name') + 1]
                     name = instance
 
@@ -164,34 +162,14 @@ def get_extras():
         if "ovs-vswitchd" in p["name"]: # software switch
             extras.append(p)
 
-        # KVM
+        # KVM networking
 
         elif "vhost-" in p["name"]: # virtual interface queue
             extras.append(p)
 
         # OpenStack
 
-        #elif "httpd" in p["name"]: # keystone
-        #    extras.append(p)
-        #elif "glance-" in p["name"]: # glance
-        #    extras.append(p)
-        #elif "nova-" in p["name"]: # nova
-        #    extras.append(p)
-        #elif "neutron-" in p["name"]: # neutron
-        #    extras.append(p)
-        #elif "ceilometer-" in p["name"]: # ceilometer
-        #    extras.append(p)
-        #elif "heat-" in p["name"]: # heat
-        #    extras.append(p)
-
-        # 3rd-party components
-
-        #elif "beam.smp" in p["name"]: # rabbitmq
-        #    extras.append(p)
-        #elif "mysqld" in p["name"]: # mysql
-        #    extras.append(p)
-        #elif "libvirtd" in p["name"]: # hypervisor
-        #    extras.append(p)
+        # Athene
 
     return extras
 
@@ -526,6 +504,7 @@ def make_the_chain_of_VNFs(config, VNFs):
 def initialize_Open_vSwitch(analysis):
     os.system("sudo ovs-vsctl del-br ovsbr0 2> /dev/null")
     os.system("sudo ovs-vsctl add-br ovsbr0")
+
     os.system("sudo ovs-vsctl set-controller ovsbr0 tcp:127.0.0.1:6633")
     os.system("sudo ovs-vsctl -- set bridge ovsbr0 protocols=OpenFlow10")
     os.system("sudo ovs-vsctl set-fail-mode ovsbr0 secure")
