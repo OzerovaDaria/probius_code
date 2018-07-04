@@ -1,7 +1,7 @@
 #!/bin/bash
 
-INBOUND_INF=ens4f0
-OUTBOUND_INF=ens4f1
+INBOUND_INF=ens37
+OUTBOUND_INF=ens38
 
 sudo ovs-vsctl del-br ovsbr0 2> /dev/null
 sudo ovs-vsctl add-br ovsbr0

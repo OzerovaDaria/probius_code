@@ -19,4 +19,5 @@ then
 fi
 
 virsh define $1.xml > /dev/null
+
 rm $1.xml
