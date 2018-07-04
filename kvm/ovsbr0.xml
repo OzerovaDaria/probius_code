@@ -1,6 +1,0 @@
-<network>
-  <name>ovsbr0</name>
-  <forward mode='bridge'/>
-  <bridge name='ovsbr0'/>
-  <virtualport type='openvswitch'/>
-</network>
