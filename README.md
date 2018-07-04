@@ -18,7 +18,8 @@
 
 # Compilation
 0. Set up a KVM environment (Management network: 192.168.254.0/24)  
-$ git clone htps://github.com/sdx4u/kvm  
+$ cd ~  
+$ git clone https://github.com/sdx4u/kvm  
 1. Get the source codes of Probius  
 $ cd ~  
 $ git clone https://github.com/sdx4u/probius  
