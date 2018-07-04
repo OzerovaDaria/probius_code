@@ -17,21 +17,17 @@
 - Psutil version = 1.2.1  
 
 # Compilation
+0. Set up a KVM environment (Management network: 192.168.254.0/24)  
+$ git clone htps://github.com/sdx4u/kvm  
 1. Get the source codes of Probius  
 $ cd ~  
 $ git clone https://github.com/sdx4u/probius  
 2. Move to the setup directory  
-$ cd ~/probius/kvm  
+$ cd ~/probius/setup/kvm  
 3. Install dependencies  
 $ ./deps_ubuntu16.sh  
-4. Install KVM and Open vSwitch  
-$ ./install.sh  
 5. Reboot  
 $ sudo reboot  
-6. Move to the setup directory again  
-$ cd ~/probius/kvm  
-7. Configure KVM networks (Management network: 192.168.254.0/24)  
-$ ./configure.sh  
 
 # Execution
 - Analyze single VNFs  
