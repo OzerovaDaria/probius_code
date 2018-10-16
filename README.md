@@ -24,9 +24,9 @@ $ git clone https://github.com/sdx4u/kvm
 $ cd ~  
 $ git clone https://github.com/sdx4u/probius  
 2. Move to the setup directory  
-$ cd ~/probius/setup/kvm  
+$ cd ~/probius/setup  
 3. Install dependencies  
-$ ./deps_ubuntu16.sh  
+$ ./deps.sh  
 5. Reboot  
 $ sudo reboot  
 

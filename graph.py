@@ -3,7 +3,6 @@
 import sys
 import sqlite3
 from graph_tool.all import *
-
 from database import ANALYSIS_DATABASE
 
 def find_vertex(vertex, label, v_len):
@@ -584,7 +583,6 @@ def generate_graphs(testcase):
                     e_color[e] = yellow
 
                 else:
-                    #print label[e.source()] + '|' + label[e.target()]
                     unknown_time += e_time[e]
                     unknown_count += e_count[e]
 
