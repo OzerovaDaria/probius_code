@@ -1,12 +1,9 @@
-#!/usr/bin/python
-
 import time
 import sqlite3
 import threading
 
 import util
-
-ANALYSIS_DATABASE = "data.db"
+from common import analysis_database
 
 lock = threading.Lock()
 query_queue = []
@@ -17,12 +14,11 @@ def run_query(query, flag=False):
     if flag == True:
         lock.acquire()
 
-        conn = sqlite3.connect(ANALYSIS_DATABASE)
+        conn = sqlite3.connect(analysis_database)
         c = conn.cursor()
 
         for queued in query_queue:
             c.execute(queued)
-
         del query_queue[:]
 
         c.execute(query)
@@ -33,9 +29,7 @@ def run_query(query, flag=False):
         lock.release()
     else:
         lock.acquire()
-
         query_queue.append(query)
-
         lock.release()
 
     return
@@ -318,7 +312,7 @@ def add_vnf_stats(stats):
     return
 
 def update_vnf_stats(config):
-    conn = sqlite3.connect(ANALYSIS_DATABASE)
+    conn = sqlite3.connect(analysis_database)
 
     cur = conn.cursor()
     cur.execute("select * from testcase order by start_time")

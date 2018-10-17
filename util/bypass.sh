@@ -1,7 +1,7 @@
 #!/bin/bash
 
-INBOUND_INF=ens37
-OUTBOUND_INF=ens38
+INBOUND_INF=`grep inbound ../config/analysis.conf | cut -d'"' -f4`
+OUTBOUND_INF=`grep outbound ../config/analysis.conf | cut -d'"' -f4`
 
 sudo ovs-vsctl del-br ovsbr0 2> /dev/null
 sudo ovs-vsctl add-br ovsbr0

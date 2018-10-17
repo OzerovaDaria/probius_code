@@ -4,13 +4,13 @@ import sys
 import sqlite3
 
 import util
-from database import ANALYSIS_DATABASE
+from common import analysis_database
 
 if len(sys.argv) != 2:
     print "%s {testcase}" % (sys.argv[0])
     exit(0)
 
-conn = sqlite3.connect(ANALYSIS_DATABASE)
+conn = sqlite3.connect(analysis_database)
 cur = conn.cursor()
 
 cur.execute("select distinct testcase, protocol, bandwidth, latency from vnf_stats")

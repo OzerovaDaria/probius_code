@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import os
 import time
 import threading
@@ -13,10 +11,10 @@ import database
 def start_sender(analysis, VNFs, protocol, bandwidth):
     option = " "
 
-    if "atto-vrouter-minimum-2-port-1" in VNFs or "NAT" in VNFs:
+    if "NAT" in VNFs:
         print "Destination IP: " + analysis["local_receiver_nat_ip"]
         option = option + analysis["local_receiver_nat_ip"]
-    else: # openstack or kvm
+    else:
         print "Destination IP: " + analysis["local_receiver_ip"]
         option = option + analysis["local_receiver_ip"]
 
@@ -26,42 +24,42 @@ def start_sender(analysis, VNFs, protocol, bandwidth):
     option = option + " -P " + analysis["sessions"]
     option = option + " -b " + str(int(bandwidth) / int(analysis["sessions"])) + "M " # Mbits/s per session
 
-    if "atto-vrouter-minimum-2-port-1" in VNFs or "NAT" in VNFs:
+    if "NAT" in VNFs:
         os.system("ssh " + analysis["sender"] + " " + analysis["run_sender"] + " NAT " + option)
-    else: # openstack or kvm
+    else:
         os.system("ssh " + analysis["sender"] + " " + analysis["run_sender"] + " " + option)
 
     return
 
 def stop_sender(analysis, VNFs):
-    if "atto-vrouter-minimum-2-port-1" in VNFs or "NAT" in VNFs:
+    if "NAT" in VNFs:
         os.system("ssh " + analysis["sender"] + " " + analysis["stop_sender"] + " NAT")
-    else: # openstack or kvm
+    else:
         os.system("ssh " + analysis["sender"] + " " + analysis["stop_sender"])
 
     return
 
 def start_receiver(analysis, VNFs):
-    if "atto-vrouter-minimum-2-port-1" in VNFs or "NAT" in VNFs:
+    if "NAT" in VNFs:
         os.system("ssh " + analysis["receiver"] + " " + analysis["run_receiver"] + " NAT")
-    else: # openstack or kvm
+    else:
         os.system("ssh " + analysis["receiver"] + " " + analysis["run_receiver"])
 
     return
 
 def stop_receiver(analysis, VNFs):
-    if "atto-vrouter-minimum-2-port-1" in VNFs or "NAT" in VNFs:
+    if "NAT" in VNFs:
         os.system("ssh " + analysis["receiver"] + " " + analysis["stop_receiver"] + " NAT")
-    else: # openstack or kvm
+    else:
         os.system("ssh " + analysis["receiver"] + " " + analysis["stop_receiver"])
 
     return
 
 def stop_sender_and_receiver(analysis, VNFs):
-    if "atto-vrouter-minimum-2-port-1" in VNFs or "NAT" in VNFs:
+    if "NAT" in VNFs:
         os.system("ssh " + analysis["sender"] + " " + analysis["stop_sender"] + " NAT")
         os.system("ssh " + analysis["receiver"] + " " + analysis["stop_receiver"] + " NAT")
-    else: # openstack or kvm
+    else:
         os.system("ssh " + analysis["sender"] + " " + analysis["stop_sender"])
         os.system("ssh " + analysis["receiver"] + " " + analysis["stop_receiver"])
 
@@ -72,15 +70,15 @@ def measure_latency(analysis, VNFs, flag):
 
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    if "atto-vrouter-minimum-2-port-1" in VNFs or "NAT" in VNFs:
+    if "NAT" in VNFs:
         os.system("ssh " + analysis["sender"] + " ping -c 1 " + analysis["local_receiver_nat_ip"] + " > /dev/null")
-    else: # openstack or kvm
+    else:
         os.system("ssh " + analysis["sender"] + " ping -c 1 " + analysis["local_receiver_ip"] + " > /dev/null")
 
-    if "atto-vrouter-minimum-2-port-1" in VNFs or "NAT" in VNFs:
+    if "NAT" in VNFs:
         os.system("ssh " + analysis["sender"] + " " + analysis["measure_latency"] + " " + analysis["local_receiver_nat_ip"] + \
                   " | tee " + LATENCY_LOG)
-    else: # openstack or kvm
+    else:
         os.system("ssh " + analysis["sender"] + " " + analysis["measure_latency"] + " " + analysis["local_receiver_ip"] + \
                   " | tee " + LATENCY_LOG)
 
@@ -110,29 +108,28 @@ def send_workloads(analysis, config, VNFs, flag):
 
     for protocol in protocols: # TCP, UDP
         for bandwidth in bandwidths: # 200, 400, 600, 800, 1000 Mbits/s
-            stop_sender_and_receiver(analysis, VNFs)
+            #stop_sender_and_receiver(analysis, VNFs)
             print "Stopped the previous sender and receiver just in case"
 
             # ============ #
 
-            if vnf_mgmt.is_openstack_env() == False: # kvm
-                vnf_mgmt.initialize_Open_vSwitch(analysis)
-                print "Initialized Open vSwitch"
+            vnf_mgmt.initialize_Open_vSwitch(analysis)
+            print "Initialized Open vSwitch"
 
-                vnf_mgmt.power_on_VNFs(config, VNFs)
-                print "Powered on VNFs"
+            vnf_mgmt.power_on_VNFs(config, VNFs)
+            print "Powered on VNFs"
 
-                config = vnf_mgmt.update_VNF_configurations(config)
-                print "Updated VNF configurations"
+            config = vnf_mgmt.update_VNF_configurations(config)
+            print "Updated VNF configurations"
 
-                vnf_mgmt.start_applications_in_VNFs(config, VNFs)
-                print "Executed applications in VNFs"
+            vnf_mgmt.start_applications_in_VNFs(config, VNFs)
+            print "Executed applications in VNFs"
 
-                rules = vnf_mgmt.make_the_chain_of_VNFs(config, VNFs)
-                print "Made flow rules for the chain of VNFs"
+            rules = vnf_mgmt.make_the_chain_of_VNFs(config, VNFs)
+            print "Made flow rules for the chain of VNFs"
 
-                vnf_mgmt.apply_the_chain_of_VNFs(rules)
-                print "Applied the chain of VNFs"
+            vnf_mgmt.apply_the_chain_of_VNFs(rules)
+            print "Applied the chain of VNFs"
 
             # ============ #
 
@@ -147,22 +144,26 @@ def send_workloads(analysis, config, VNFs, flag):
 
             time.sleep(1.0)
 
-            start_receiver(analysis, VNFs)
+            #start_receiver(analysis, VNFs)
             print "Executed a receiver"
 
-            measure_latency(analysis, VNFs, False)
+            #measure_latency(analysis, VNFs, False)
             print "Measured end-to-end latencies without workloads"
 
-            start_sender(analysis, VNFs, protocol, bandwidth)
+            #start_sender(analysis, VNFs, protocol, bandwidth)
             print "Executed a sender (protocol=%s, bandwidth=%sMB)" % (protocol, bandwidth)
 
             time.sleep(5.0)
             print "Started to monitor VNFs"
 
-            measure_latency(analysis, VNFs, True)
+            #measure_latency(analysis, VNFs, True)
             print "Measured end-to-end latencies with workloads"
 
+            # ============ #
+
             monitor.monitor_VNFs(analysis, config, VNFs, extras, monitor_time)
+
+            # ============ #
 
             while True: # waiting until all monitoring threads are terminated
                 if threading.active_count() == 1:
@@ -171,9 +172,10 @@ def send_workloads(analysis, config, VNFs, flag):
                     time.sleep(1.0)
             print "Stopped monitoring VNFs"
 
-            if vnf_mgmt.is_athene_env() == False: # openstack or kvm
-                vnf_mgmt.get_application_stats_of_VNFs(config, VNFs)
-                print "Got the statistics of passive VNFs"
+            vnf_mgmt.get_application_stats_of_VNFs(config, VNFs)
+            print "Got the statistics of passive VNFs"
+
+            # ============ #
 
             if flag == True:
                 trace.run_trace(trace_time)
@@ -182,10 +184,12 @@ def send_workloads(analysis, config, VNFs, flag):
                 trace.analyze_trace(VNFs, protocol, bandwidth)
                 print "Analyzed the events"
 
-            stop_sender(analysis, VNFs)
+            # ============ #
+
+            #stop_sender(analysis, VNFs)
             print "Stopped the sender"
 
-            stop_receiver(analysis, VNFs)
+            #stop_receiver(analysis, VNFs)
             print "Stopped the receiver"
 
             time.sleep(1.0)
@@ -197,12 +201,11 @@ def send_workloads(analysis, config, VNFs, flag):
 
             # ============ #
 
-            if vnf_mgmt.is_openstack_env() == False: # kvm
-                vnf_mgmt.stop_applications_in_VNFs(config, VNFs)
-                print "Terminated applications in VNFs"
+            vnf_mgmt.stop_applications_in_VNFs(config, VNFs)
+            print "Terminated applications in VNFs"
 
-                vnf_mgmt.shut_down_VNFs(VNFs)
-                print "Shut down VNFs"
+            vnf_mgmt.shut_down_VNFs(VNFs)
+            print "Shut down VNFs"
 
             # ============ #
 

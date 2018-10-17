@@ -3,7 +3,8 @@
 import sys
 import sqlite3
 from graph_tool.all import *
-from database import ANALYSIS_DATABASE
+
+from common import analysis_database
 
 def find_vertex(vertex, label, v_len):
     i = 0
@@ -14,7 +15,7 @@ def find_vertex(vertex, label, v_len):
     return -1
 
 def generate_graphs(testcase):
-    conn = sqlite3.connect(ANALYSIS_DATABASE)
+    conn = sqlite3.connect(analysis_database)
     cur = conn.cursor()
 
     cur.execute("select * from testcase where testcase = '" + testcase + "' order by start_time")

@@ -1,14 +1,7 @@
-#!/usr/bin/python
-
 import math
 import subprocess
 import numpy as np
 import statsmodels.api as sm
-
-#try:
-#    import statsmodels.api as sm
-#except ImportError:
-#    pass
 
 # Statistics #
 
@@ -312,12 +305,3 @@ def cook_distance(X_list, y_list):
     D = np.array([np.sum((yhat - model(y[idx!=i], X[idx!=i]).fit().predict(X))**2.0) for i in range(n)]) / denom
 
     return D.tolist()
-
-# etc #
-
-def get_psutil_version():
-    res = subprocess.check_output("util/check_psutil_version.sh", shell=True)
-    res = res.replace(" ", "-")
-    version = res.rstrip()
-    version = version.split("-")
-    return version[2]

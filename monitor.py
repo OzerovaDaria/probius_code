@@ -1,12 +1,9 @@
-#!/usr/bin/python
-
 import os
 import time
 import psutil
 import libvirt
 import threading
 import subprocess
-
 from xml.dom import minidom
 from xml.etree import ElementTree
 from datetime import datetime
@@ -18,7 +15,6 @@ import database
 guest_vnf_info = {}
 host_vnf_info = {}
 host_ext_info = {}
-
 host_info = {}
 host_nic = {}
 
@@ -116,11 +112,7 @@ def monitor_VNF(config, vnf):
     if conn == None:
         print "Error: failed to connect QEMU"
     else:
-        dom = None
-        if vnf_mgmt.is_openstack_env() == True:
-            dom = conn.lookupByName(config[vnf]["instance"])
-        else:
-            dom = conn.lookupByName(vnf)
+        dom = conn.lookupByName(vnf)
 
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         print str(vnf) + " monitors start: " + str(timestamp)

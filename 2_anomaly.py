@@ -4,9 +4,9 @@ import sqlite3
 import math
 
 import util
-from database import ANALYSIS_DATABASE
+from common import analysis_database
 
-conn = sqlite3.connect(ANALYSIS_DATABASE)
+conn = sqlite3.connect(analysis_database)
 cur = conn.cursor()
 
 cur.execute("select distinct vnf from vnf_stats")

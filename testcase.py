@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 def generate_testcase(VNFs):
     cases = []
 

@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import os
 import sys
 import psutil
@@ -7,8 +5,7 @@ import database
 from datetime import datetime
 
 import util
-
-TRACE_LOG = "tmp/trace.log"
+from common import trace_log
 
 tids = {}
 
@@ -45,11 +42,11 @@ def run_trace(trace_time):
     return
 
 def analyze_trace(VNFs, protocol, bandwidth):
-    os.system("sudo trace-cmd report -t 2> /dev/null > " + TRACE_LOG)
+    os.system("sudo trace-cmd report -t 2> /dev/null > " + trace_log)
 
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    f = open(TRACE_LOG, "r")
+    f = open(trace_log, "r")
     raw_traces = f.read().splitlines()
 
     num_cpus = 0
@@ -169,6 +166,6 @@ def analyze_trace(VNFs, protocol, bandwidth):
         for pair in global_pairs[pid]:
             database.trace_info_pid(timestamp, pid, pair, global_pairs_cnt[pid][pair], global_pairs_time[pid][pair])
 
-    os.system("rm " + TRACE_LOG)
+    os.system("rm " + trace_log)
 
     return

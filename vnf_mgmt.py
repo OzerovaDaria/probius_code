@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import os
 import time
 import json
@@ -9,18 +7,6 @@ import subprocess
 from datetime import datetime
 
 import database
-
-def is_athene_env(): # Athene from ATTO Research
-    if os.path.exists("/usr/lib/systemd/system/athene-ics-server.service") == True:
-        return True
-    else:
-        return False
-
-def is_openstack_env(): # openstack
-    if os.path.exists("/usr/bin/openstack") == True:
-        return True
-    else:
-        return False
 
 def load_VNF_configurations(conf_file):
     config = {}
@@ -32,12 +18,9 @@ def load_VNF_configurations(conf_file):
             config[name] = {}
 
             config[name]["name"] = str(name) # VNF name in a configuration
-            config[name]["instance"] = "" # VNF name in a NFV platform
-
             config[name]["type"] = str(data[name]["type"]) # passive or inline
 
-            config[name]["pid"] = "" # process ID
-            config[name]["uuid"] = "" # instance ID
+            config[name]["pid"] = "" # Process ID
 
             config[name]["net0"] = "" # mgmt virtual interface
             config[name]["net1"] = "" # inbound virtual interface
@@ -69,63 +52,12 @@ def update_VNF_configurations(config):
 
         for entry in vnf['cmdline']:
             if "qemu-system-x86_64" in entry or "qemu-kvm" in entry:
-                name = ""
-                instance = ""
-
-                uuid = vnf['cmdline'][vnf['cmdline'].index('-uuid') + 1]
-
-                if is_athene_env() == True: # Athene
-                    temp = vnf['cmdline'][vnf['cmdline'].index('-name') + 1]
-                    temp = temp.replace(",", "=")
-                    temp = temp.split("=")
-
-                    for t in temp:
-                        if "instance" in t:
-                            instance = t
-
-                    cmd = "openstack server list | grep " + uuid + " | awk '{print $4}'"
-                    res = subprocess.check_output(cmd, shell=True)
-                    name = res.rstrip()
-
-                    cmd = "openstack server list | grep " + uuid + " | awk '{print $8}'"
-                    res = subprocess.check_output(cmd, shell=True)
-                    res = res.replace(",", "=")
-                    res = res.replace(";", "=")
-                    res = res.split("=")
-
-                    config[name]["mgmt_ip"] = config[name]["mgmt_ip"].replace("unknown", res[1])
-                elif is_openstack_env() == True: # openstack
-                    temp = vnf['cmdline'][vnf['cmdline'].index('-name') + 1]
-                    temp = temp.replace(",", "=")
-                    temp = temp.split("=")
-
-                    for t in temp:
-                        if "instance" in t:
-                            instance = t
-
-                    cmd = "openstack server list | grep " + uuid + " | awk '{print $4}'"
-                    res = subprocess.check_output(cmd, shell=True)
-                    name = res.rstrip()
-
-                    cmd = "openstack server list | grep " + uuid + " | awk '{print $8}'"
-                    res = subprocess.check_output(cmd, shell=True)
-                    res = res.replace(",", "=")
-                    res = res.replace(";", "=")
-                    res = res.split("=")
-
-                    config[name]["mgmt_ip"] = config[name]["mgmt_ip"].replace("unknown", res[1])
-                else: # kvm
-                    instance = vnf['cmdline'][vnf['cmdline'].index('-name') + 1]
-                    name = instance
-
+                name = vnf['cmdline'][vnf['cmdline'].index('-name') + 1]
                 if name not in config:
                     print "%s is not in the VNF configurations" % (name)
                     continue
 
-                config[name]["instance"] = instance
-
                 config[name]["pid"] = vnf['pid']
-                config[name]["uuid"] = uuid
 
                 for entry in vnf['cmdline']:
                     if "id=net" in entry:
@@ -137,7 +69,7 @@ def update_VNF_configurations(config):
                         mac_option = options[3]
                         mac = mac_option.split("=")[1]
 
-                        cmd = "virsh domiflist " + instance + " | grep " + mac + " | awk '{print $1}'"
+                        cmd = "virsh domiflist " + name + " | grep " + mac + " | awk '{print $1}'"
                         res = subprocess.check_output(cmd, shell=True)
                         intf = res.rstrip()
 
@@ -166,10 +98,6 @@ def get_extras():
 
         elif "vhost-" in p["name"]: # virtual interface queue
             extras.append(p)
-
-        # OpenStack
-
-        # Athene
 
     return extras
 
@@ -200,7 +128,7 @@ def make_resources_VNFs(analysis, config, VNFs, flag):
             for cpu in cpu_list:
                 loop_cnt = pow(len(cpu_list), len(VNFs) - idx - 1)
                 for loop in range(loop_cnt):
-                    if flag == True:
+                    if flag == False:
                         cpus[cpus_idx][idx] = cpu
                     else:
                         vnf_cpu = config[VNFs[idx]]["cpu"].split(',')
@@ -228,7 +156,7 @@ def make_resources_VNFs(analysis, config, VNFs, flag):
             for mem in mem_list:
                 loop_cnt = pow(len(mem_list), len(VNFs) - idx - 1)
                 for loop in range(loop_cnt):
-                    if flag == True:
+                    if flag == False:
                         mems[mems_idx][idx] = mem
                     else:
                         vnf_mem = config[VNFs[idx]]["mem"].split(',')
@@ -282,7 +210,7 @@ def get_cpuset_of_VNFs(cpu, VNFs):
 
 def set_cpus_of_VNFs(cpu, cpuset, VNFs):
     for idx in range(len(VNFs)):
-        os.system("util/kvm/set-vcpu.sh %s %s %s" % (VNFs[idx], cpuset[idx], cpu[idx]))
+        os.system("util/set-vcpu.sh %s %s %s" % (VNFs[idx], cpuset[idx], cpu[idx]))
         print "set-vcpu " + VNFs[idx] + " " + cpuset[idx] + " " + cpu[idx]
 
     return
@@ -290,7 +218,7 @@ def set_cpus_of_VNFs(cpu, cpuset, VNFs):
 def set_mems_of_VNFs(mem, VNFs):
     for idx in range(len(VNFs)):
         size = str(int(mem[idx]) * 1024)
-        os.system("util/kvm/set-vmem.sh %s %s" % (VNFs[idx], size))
+        os.system("util/set-vmem.sh %s %s" % (VNFs[idx], size))
         print "set-vmem " + VNFs[idx] + " " + size
 
     return
@@ -410,7 +338,7 @@ def get_application_stats_of_VNFs(config, VNFs):
     return
 
 def get_port_from_intf(interface):
-    cmd = "util/kvm/port-map.sh | grep " + interface + " | awk '{print $2}' | head -n 1"
+    cmd = "util/port-map.sh | grep " + interface + " | awk '{print $2}' | head -n 1"
     res = subprocess.check_output(cmd, shell=True)
     return res.rstrip()
 
@@ -518,6 +446,6 @@ def apply_the_chain_of_VNFs(rules):
     for rule in rules:
         os.system(rule)
 
-    os.system("util/kvm/dump-flows.sh")
+    os.system("util/dump-flows.sh")
 
     return
