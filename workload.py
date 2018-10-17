@@ -108,7 +108,7 @@ def send_workloads(analysis, config, VNFs, flag):
 
     for protocol in protocols: # TCP, UDP
         for bandwidth in bandwidths: # 200, 400, 600, 800, 1000 Mbits/s
-            #stop_sender_and_receiver(analysis, VNFs)
+            stop_sender_and_receiver(analysis, VNFs)
             print "Stopped the previous sender and receiver just in case"
 
             # ============ #
@@ -144,19 +144,19 @@ def send_workloads(analysis, config, VNFs, flag):
 
             time.sleep(1.0)
 
-            #start_receiver(analysis, VNFs)
+            start_receiver(analysis, VNFs)
             print "Executed a receiver"
 
-            #measure_latency(analysis, VNFs, False)
+            measure_latency(analysis, VNFs, False)
             print "Measured end-to-end latencies without workloads"
 
-            #start_sender(analysis, VNFs, protocol, bandwidth)
+            start_sender(analysis, VNFs, protocol, bandwidth)
             print "Executed a sender (protocol=%s, bandwidth=%sMB)" % (protocol, bandwidth)
 
             time.sleep(5.0)
             print "Started to monitor VNFs"
 
-            #measure_latency(analysis, VNFs, True)
+            measure_latency(analysis, VNFs, True)
             print "Measured end-to-end latencies with workloads"
 
             # ============ #
@@ -186,10 +186,10 @@ def send_workloads(analysis, config, VNFs, flag):
 
             # ============ #
 
-            #stop_sender(analysis, VNFs)
+            stop_sender(analysis, VNFs)
             print "Stopped the sender"
 
-            #stop_receiver(analysis, VNFs)
+            stop_receiver(analysis, VNFs)
             print "Stopped the receiver"
 
             time.sleep(1.0)
