@@ -37,12 +37,18 @@ $ ./1\_analysis.py vnf
 $ ./1\_analysis.py sc [# of VNFs]  
 - Analyze a specific service chain  
 $ ./1\_analysis.py case [VNF1,VNF2,VNF3,...]  
+
 - Detect performance anomaly  
 $ ./2\_anomaly.py  
+
 - Get the details of a suspicious service chain  
 $ ./3\_report.py [VNF1,VNF2,VNF3, ...]  
+
 - Draw state transition graphs for a suspicious service chain  
 $ ./4\_graph.py [VNF1,VNF2,VNF3, ...]  
+
+- CAUSION!  
+Please make sure that you have changed configuration files in the 'config' directory for your environment!  
 
 # Author
 - Jaehyun Nam <namjh@kaist.ac.kr>  
