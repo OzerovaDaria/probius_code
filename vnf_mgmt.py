@@ -317,7 +317,7 @@ def stop_applications_in_VNFs(config, VNFs):
 def get_application_stats_of_VNFs(config, VNFs):
     for vnf in VNFs:
         if config[vnf]["type"] == "passive":
-            os.system("ssh " + config[vnf]["mgmt_ip"] + " " + config[vnf]["stat"] + " | tee tmp/stats.log")
+            os.system("ssh " + config[vnf]["mgmt_ip"] + " sudo " + config[vnf]["stat"] + " | tee tmp/stats.log")
 
             timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
