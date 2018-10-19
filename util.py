@@ -1,7 +1,11 @@
+# General libraries
 import math
 import subprocess
 import numpy as np
 import statsmodels.api as sm
+
+# Probius libraries
+# Nothing to import
 
 # Statistics #
 
@@ -34,10 +38,6 @@ def get_M(values):
 
     tmp.sort()
     length = len(tmp)
-
-    if length == 0:
-        return 0.0
-
     median = length / 2
 
     if length % 2 == 1:
@@ -53,10 +53,6 @@ def get_S(values):
 
     tmp.sort()
     length = len(tmp)
-
-    if length == 0:
-        return 0.0
-
     avg = (sum(tmp) * 1.0) / length
 
     dev = []
@@ -96,12 +92,7 @@ def get_average(values, flag=False):
                 elif t > (med_tmp + (std_tmp * 0.34)):
                     tmp.remove(t)
 
-    length = len(tmp)
-
-    if length == 0:
-        return 0.0
-    else:
-        return (sum(tmp) * 1.0) / length
+    return (sum(tmp) * 1.0) / len(tmp)
 
 def get_median(values, flag=False):
     if len(values) == 0:
@@ -126,10 +117,6 @@ def get_median(values, flag=False):
                     tmp.remove(t)
 
     length = len(tmp)
-
-    if length == 0:
-        return 0.0
-
     median = length / 2
 
     if length % 2 == 1:
@@ -160,10 +147,6 @@ def get_stdev(values, flag=False):
                     tmp.remove(t)
 
     length = len(tmp)
-
-    if length == 0:
-        return 0.0
-
     avg = (sum(tmp) * 1.0) / length
 
     dev = []

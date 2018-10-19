@@ -1,8 +1,10 @@
 #!/usr/bin/python
 
+# General libraries
 import sys
 import sqlite3
 
+# Probius libraries
 import util
 from common import analysis_database
 

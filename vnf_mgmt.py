@@ -1,3 +1,4 @@
+# General libraries
 import os
 import time
 import json
@@ -6,6 +7,7 @@ import libvirt
 import subprocess
 from datetime import datetime
 
+# Probius libraries
 import database
 
 def load_VNF_configurations(conf_file):
@@ -89,13 +91,8 @@ def get_extras():
         except psutil.NoSuchProcess:
             pass
 
-        # Open vSwitch
-
         if "ovs-vswitchd" in p["name"]: # software switch
             extras.append(p)
-
-        # KVM networking
-
         elif "vhost-" in p["name"]: # virtual interface queue
             extras.append(p)
 
@@ -258,9 +255,7 @@ def power_on_VNFs(config, VNFs):
             else: # True
                 curr = conn.lookupByName(vnf)
                 curr.destroy()
-
                 time.sleep(1.0)
-
                 curr.create()
                 conn.close()
 
@@ -290,9 +285,7 @@ def is_after_NAT(vnf, VNFs):
     ret = False
 
     for v in VNFs:
-        if v == "atto-vrouter-minimum-2-port-1":
-            ret = True
-        elif v == "NAT":
+        if v == "NAT":
             ret = True
         elif v == vnf:
             break

@@ -1,9 +1,11 @@
+# General libraries
 import os
 import sys
 import psutil
 import database
 from datetime import datetime
 
+# Probius libraries
 import util
 from common import trace_log
 
@@ -18,16 +20,7 @@ def run_trace(trace_time):
         except psutil.NoSuchProcess:
             pass
 
-        accepted = False
-
-        if "qemu-system-x86_64" in ps["name"]:
-            accepted = True
-        elif "qemu-kvm" in ps["name"]:
-            accepted = True
-        elif "vhost-" in ps["name"]:
-            accepted = True
-
-        if accepted == False:
+        if "qemu-system-x86_64" not in ps["name"] and "qemu-kvm" not in ps["name"] and "vhost-" not in ps["name"]:
             continue
 
         p = psutil.Process(ps['pid'])

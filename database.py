@@ -1,7 +1,9 @@
+# General libraries
 import time
 import sqlite3
 import threading
 
+# Probius libraries
 import util
 from common import analysis_database
 
@@ -17,10 +19,14 @@ def run_query(query, flag=False):
         conn = sqlite3.connect(analysis_database)
         c = conn.cursor()
 
+        # insert queued queries
         for queued in query_queue:
             c.execute(queued)
+
+        # reset the queue
         del query_queue[:]
 
+        # insert a new query
         c.execute(query)
 
         conn.commit()

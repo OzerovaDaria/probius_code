@@ -1,17 +1,32 @@
 #!/usr/bin/python
 
+# General libraries
 import sys
 import sqlite3
 from graph_tool.all import *
 
+# Probius libraries
 from common import analysis_database
+
+yellow = '#eae88a'
+pink = '#ea8ad9'
+purple = '#a98aea'
+blue = '#8a93ea'
+sky = '#8ad2ea'
+green = '#8aeabd'
+grass = '#96ea8a'
+red = '#ea8a8a'
+orange = '#eab08a'
+brown = '#967e7e'
 
 def find_vertex(vertex, label, v_len):
     i = 0
+
     while i<v_len:
         if label[i] == vertex:
             return i
         i += 1
+
     return -1
 
 def generate_graphs(testcase):
@@ -138,29 +153,53 @@ def generate_graphs(testcase):
                     elist.append(e)
                     e_color[e] = default_color
 
+            # initialization
             init_time = 0
             init_count = 0
+
+            # computation
             computation_time = 0
             computation_count = 0
+
+            # hard context-switch
             hw_time = 0
             hw_count = 0
+
+            # soft context-switch
             sw_time = 0
             sw_count = 0
+
+            # memory access
             mem_time = 0
             mem_count = 0
+
+            # IO operation
             io_time = 0
             io_count = 0
+
+            # interrupt
             inte_time = 0
             inte_count = 0
+
+            # idleness
             idle_time = 0
             idle_count = 0
+
+            # lock connection
             lock_time = 0
             lock_count = 0
+
+            # outsides (other processes are running)
+            out_time = 0
+            out_count = 0
+
+            # unknown (undefined ones)
             unknown_time = 0
             unknown_count = 0
+
+            # sub events
             irq_time = 0
             irq_count = 0
-
             msr_time = 0
             msr_count = 0
             exter_time = 0
@@ -177,20 +216,6 @@ def generate_graphs(testcase):
             mis_count = 0
             nmi_time = 0
             nmi_count = 0
-
-            out_time = 0
-            out_count = 0
-
-            yellow = '#eae88a'
-            pink = '#ea8ad9'
-            purple = '#a98aea'
-            blue = '#8a93ea'
-            sky = '#8ad2ea'
-            green = '#8aeabd'
-            grass = '#96ea8a'
-            red = '#ea8a8a'
-            orange = '#eab08a'
-            brown = '#967e7e'
 
             for e in elist:
                 if label[e.source()] == 'entry':
@@ -587,7 +612,9 @@ def generate_graphs(testcase):
                     unknown_time += e_time[e]
                     unknown_count += e_count[e]
 
-            print "%s | %s | %s | %s | %s | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d" % \
+            print "%s | %s | %s | %s | %s | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d | " + \
+                  "%f | %d | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d | " + \
+                  "%f | %d | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d" % \
                   (case, protocol, bandwidth, vnf, str(cpu_nums[vnf]), \
                    computation_time, computation_count, init_time, init_count, \
                    hw_time, hw_count, sw_time, sw_count, mem_time, mem_count, \

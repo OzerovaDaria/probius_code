@@ -1,3 +1,4 @@
+# General libraries
 import os
 import time
 import psutil
@@ -8,6 +9,7 @@ from xml.dom import minidom
 from xml.etree import ElementTree
 from datetime import datetime
 
+# Probius libraries
 import util
 import vnf_mgmt
 import database

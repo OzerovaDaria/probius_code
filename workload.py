@@ -1,8 +1,10 @@
+# General libraries
 import os
 import time
 import threading
 from datetime import datetime
 
+# Probius libraries
 import trace
 import monitor
 import vnf_mgmt

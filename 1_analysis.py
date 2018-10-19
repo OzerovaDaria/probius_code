@@ -1,10 +1,12 @@
 #!/usr/bin/python
 
+# General libraries
 import os
 import sys
 import time
 import json
 
+# Probius libraries
 import common
 import testcase
 import vnf_mgmt

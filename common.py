@@ -1,7 +1,10 @@
-# ANALYSIS #
+# Probius global variables
 
-#debug = True
+# COMMON #
+
 debug = False
+
+# ANALYSIS #
 
 local_resource_constraint = True
 trace_state_transitions = True
