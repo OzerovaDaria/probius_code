@@ -41,6 +41,9 @@ def load_VNF_policies(VNFs, policy_file):
             line = line.strip("\n")
             line = line.replace(" ", "")
 
+            if "#" in line:
+                continue
+
             if line.count("&"):
                 operand = line.split("&")
 
