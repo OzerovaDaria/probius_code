@@ -9,8 +9,12 @@ import trace
 import monitor
 import vnf_mgmt
 import database
+from common import no_workload
 
 def start_sender(analysis, VNFs, protocol, bandwidth):
+    if no_workload == True:
+        return
+
     option = " "
 
     if "NAT" in VNFs:
@@ -34,6 +38,9 @@ def start_sender(analysis, VNFs, protocol, bandwidth):
     return
 
 def stop_sender(analysis, VNFs):
+    if no_workload == True:
+        return
+
     if "NAT" in VNFs:
         os.system("ssh " + analysis["sender"] + " " + analysis["stop_sender"] + " NAT")
     else:
@@ -42,6 +49,9 @@ def stop_sender(analysis, VNFs):
     return
 
 def start_receiver(analysis, VNFs):
+    if no_workload == True:
+        return
+
     if "NAT" in VNFs:
         os.system("ssh " + analysis["receiver"] + " " + analysis["run_receiver"] + " NAT")
     else:
@@ -50,6 +60,9 @@ def start_receiver(analysis, VNFs):
     return
 
 def stop_receiver(analysis, VNFs):
+    if no_workload == True:
+        return
+
     if "NAT" in VNFs:
         os.system("ssh " + analysis["receiver"] + " " + analysis["stop_receiver"] + " NAT")
     else:
@@ -58,6 +71,9 @@ def stop_receiver(analysis, VNFs):
     return
 
 def stop_sender_and_receiver(analysis, VNFs):
+    if no_workload == True:
+        return
+
     if "NAT" in VNFs:
         os.system("ssh " + analysis["sender"] + " " + analysis["stop_sender"] + " NAT")
         os.system("ssh " + analysis["receiver"] + " " + analysis["stop_receiver"] + " NAT")
@@ -68,6 +84,9 @@ def stop_sender_and_receiver(analysis, VNFs):
     return
 
 def measure_latency(analysis, VNFs, flag):
+    if no_workload == True:
+        return
+
     LATENCY_LOG = "tmp/latency"
 
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
