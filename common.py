@@ -2,7 +2,7 @@
 
 # COMMON #
 
-debug = True
+debug = False
 
 # ANALYSIS #
 
@@ -19,4 +19,4 @@ trace_log = "tmp/trace.log"
 
 # WORKLOAD #
 
-no_workload = True
+no_workload = False
