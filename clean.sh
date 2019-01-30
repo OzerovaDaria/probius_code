@@ -1,3 +1,3 @@
 #!/bin/bash
 
-rm -f data.db* report.db* trace.dat* *.pyc *.pdf tmp/*
+rm -f *.pyc data.db* report.db* trace.dat* graphs/* tmp/*

@@ -6,7 +6,9 @@ then
 elif [ -z $2 ]
 then
 	echo "Usage: $0 [VNF name] [e1000 | virtio]"
-elif [ "$2" == "e1000" ]
+fi
+
+if [ "$2" == "e1000" ]
 then
 	sudo cat /etc/libvirt/qemu/$1.xml > $1.xml
 	sed -i "s/<model type='virtio'\/>/<model type='e1000'\/>/g" $1.xml

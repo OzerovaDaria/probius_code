@@ -1,9 +1,6 @@
 # General libraries
-import os
-import time
-import json
-import psutil
-import libvirt
+import os, time, json
+import psutil, libvirt
 import subprocess
 from datetime import datetime
 
@@ -38,10 +35,21 @@ def load_VNF_configurations(conf_file):
 
             config[name]["start"] = str(data[name]["start"]) # application start script
             config[name]["stop"] = str(data[name]["stop"]) # application stop script
-            config[name]["stat"] = str(data[name]["stat"]) # application stat script (for passive VNFs)
 
-            config[name]["init"] = str(data[name]["init"]) # VNF init script before/without NAT
-            config[name]["nat_init"] = str(data[name]["nat_init"]) # VNF init script after NAT
+            if "stat" in data[name]:
+                config[name]["stat"] = str(data[name]["stat"]) # application stat script (for passive VNFs)
+            else:
+                config[name]["stat"] = ""
+
+            if "init" in data[name]:
+                config[name]["init"] = str(data[name]["init"]) # VNF init script before/without NAT
+            else:
+                config[name]["init"] = ""
+
+            if "nat_init" in data[name]:
+                config[name]["nat_init"] = str(data[name]["nat_init"]) # VNF init script after NAT
+            else:
+                config[name]["nat_init"] = ""
 
     return config
 
@@ -98,7 +106,7 @@ def get_extras():
 
     return extras
 
-def get_the_list_of_VNFs(config):
+def get_list_of_VNFs(config):
     VNFs = []
 
     for name in config:
@@ -228,16 +236,19 @@ def is_VNF_alive(mgmt_ip):
         return False
 
 def is_VNF_active(vnf):
-    res = False
+    res = -1
 
     conn = libvirt.open("qemu:///system")
     if conn == None:
         print "Error: failed to connect QEMU"
         exit(-1)
     else:
-        curr = conn.lookupByName(vnf)
-        res = curr.isActive()
-        conn.close()
+        try:
+            curr = conn.lookupByName(vnf)
+            res = curr.isActive()
+            conn.close()
+        except libvirt.libvirtError:
+            pass
 
     return res
 
@@ -255,7 +266,9 @@ def power_on_VNFs(config, VNFs):
             else: # True
                 curr = conn.lookupByName(vnf)
                 curr.destroy()
+
                 time.sleep(1.0)
+
                 curr.create()
                 conn.close()
 
@@ -268,8 +281,12 @@ def power_on_VNFs(config, VNFs):
     return
 
 def shut_down_VNFs(VNFs):
+    filtered = []
+
     for vnf in VNFs:
-        if is_VNF_active(vnf):
+        ret = is_VNF_active(vnf)
+
+        if ret > 0:
             conn = libvirt.open("qemu:///system")
             if conn == None:
                 print "Error: failed to connect QEMU"
@@ -279,7 +296,10 @@ def shut_down_VNFs(VNFs):
                 VNF.destroy()
                 conn.close()
 
-    return
+        if ret >= 0:
+            filtered.append(vnf)
+
+    return filtered
 
 def is_after_NAT(vnf, VNFs):
     ret = False
@@ -335,7 +355,7 @@ def get_port_from_intf(interface):
     res = subprocess.check_output(cmd, shell=True)
     return res.rstrip()
 
-def make_the_chain_of_VNFs(config, VNFs):
+def make_chain_of_VNFs(config, VNFs):
     rules = []
 
     vnf_cnt = 0
@@ -435,7 +455,7 @@ def initialize_Open_vSwitch(analysis):
 
     return
 
-def apply_the_chain_of_VNFs(rules):
+def apply_chain_of_VNFs(rules):
     for rule in rules:
         os.system(rule)
 

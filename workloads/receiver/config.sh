@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INTERFACE="enp12s0"
+INTERFACE="eth1"
 IP_ADDR=`ifconfig $INTERFACE | grep "inet addr" | awk '{print $2}' | awk -F":" '{print $2}'`
 
 SENDER_NET="192.168.10.0"

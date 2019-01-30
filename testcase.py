@@ -1,9 +1,3 @@
-# General libraries
-# Nothing to import
-
-# Probius libraries
-# Nothing to import
-
 def generate_testcase(VNFs):
     cases = []
 

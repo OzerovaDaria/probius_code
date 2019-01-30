@@ -4,9 +4,6 @@ import subprocess
 import numpy as np
 import statsmodels.api as sm
 
-# Probius libraries
-# Nothing to import
-
 # Statistics #
 
 def get_difference(values):
@@ -168,6 +165,7 @@ def get_stdev(values, flag=False):
 
 def get_latency(latencies):
     values = []
+
     for latency in latencies:
         values.append(float(latency[0]))
 
@@ -178,6 +176,7 @@ def get_guest_cpu_time(guest_cpu_times):
     vcpu = []
     user = []
     system = []
+
     for guest_cpu_time in guest_cpu_times:
         cpu.append(float(guest_cpu_time[0]))
         vcpu.append(float(guest_cpu_time[1]))
@@ -193,6 +192,7 @@ def get_host_cpu_time(host_cpu_times):
     cpu = []
     user = []
     system = []
+
     for host_cpu_time in host_cpu_times:
         cpu.append(float(host_cpu_time[0]))
         user.append(float(host_cpu_time[1]))
@@ -206,6 +206,7 @@ def get_mem_usage(mem_usages):
     mem_percent = []
     total_mem = []
     rss_mem = []
+
     for mem_usage in mem_usages:
         mem_percent.append(float(mem_usage[0]))
         total_mem.append(float(mem_usage[1]))
@@ -220,6 +221,7 @@ def get_io_counters(io_counters):
     read_bytes = []
     write_count = []
     write_bytes = []
+
     for io_counter in io_counters:
         read_count.append(float(io_counter[0]))
         read_bytes.append(float(io_counter[1]))
@@ -236,6 +238,7 @@ def get_net_counters(net_counters):
     bps_recv = []
     pps_sent = []
     bps_sent = []
+
     for net_counter in net_counters:
         pps_recv.append(float(net_counter[0]))
         bps_recv.append(float(net_counter[1]) * 8.0)
@@ -249,6 +252,7 @@ def get_net_counters(net_counters):
 
 def get_num_threads(num_threads):
     threads = []
+
     for num_thread in num_threads:
         threads.append(float(num_thread[0]))
 
@@ -257,6 +261,7 @@ def get_num_threads(num_threads):
 def get_num_ctx_switches(num_ctx_switches):
     vol_ctx = []
     invol_ctx = []
+
     for num_ctx_switch in num_ctx_switches:
         vol_ctx.append(float(num_ctx_switch[0]))
         invol_ctx.append(float(num_ctx_switch[1]))

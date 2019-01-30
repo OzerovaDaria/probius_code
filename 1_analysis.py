@@ -1,10 +1,7 @@
 #!/usr/bin/python
 
 # General libraries
-import os
-import sys
-import time
-import json
+import os, sys, time, json
 
 # Probius libraries
 import common
@@ -13,7 +10,7 @@ import vnf_mgmt
 import workload
 import database
 
-def load_analysis_configurations(conf_file):
+def load_global_configurations(conf_file):
     config = {}
 
     with open(conf_file) as data_file:
@@ -29,8 +26,6 @@ def load_analysis_configurations(conf_file):
         config["run_sender"] = data["workload"]["run_sender"]
         config["stop_sender"] = data["workload"]["stop_sender"]
 
-        config["measure_latency"] = data["workload"]["measure_latency"]
-
         config["receiver"] = data["workload"]["receiver"]
         config["run_receiver"] = data["workload"]["run_receiver"]
         config["stop_receiver"] = data["workload"]["stop_receiver"]
@@ -45,11 +40,13 @@ def load_analysis_configurations(conf_file):
         config["protocol"] = data["workload"]["protocol"]
         config["bandwidth"] = data["workload"]["bandwidth"]
 
+        config["measure_latency"] = data["workload"]["measure_latency"]
+
     return config
 
-def run_analysis(analysis, config, case):
+def run_analysis(g_config, config, case):
     # make the resources of VNFs
-    cpus, mems = vnf_mgmt.make_resources_VNFs(analysis, config, case, common.local_resource_constraint)
+    cpus, mems = vnf_mgmt.make_resources_VNFs(g_config, config, case, common.local_resource_constraint)
 
     for cpu in cpus:
         # get cpuset of VNFs
@@ -71,7 +68,7 @@ def run_analysis(analysis, config, case):
 
             if common.debug == False:
                 # send workload (run monitor and trace)
-                workload.send_workloads(analysis, config, case, common.trace_state_transitions)
+                workload.send_workloads(g_config, config, case, common.trace_state_transitions)
 
 runmode = ""
 num_VNFs = 0
@@ -99,16 +96,16 @@ else:
 database.initialize_database()
 print "Initialized the Probius database"
 
-# load analysis configurations
-analysis = load_analysis_configurations("config/analysis.conf")
-print "Loaded analysis configurations"
+# load global configurations
+g_config = load_global_configurations("config/global.conf")
+print "Loaded global configurations"
 
 # load VNF configurations
 config = vnf_mgmt.load_VNF_configurations("config/vnf.conf")
 print "Loaded VNF configurations"
 
 # get the list of VNFs
-VNFs = vnf_mgmt.get_the_list_of_VNFs(config)
+VNFs = vnf_mgmt.get_list_of_VNFs(config)
 print "Available VNFs in the config file: ", VNFs
 
 # load VNF chaining policies
@@ -116,9 +113,8 @@ policies = testcase.load_VNF_policies(VNFs, "config/policy.conf")
 print "Loaded VNF policies"
 
 # shut down the active VNFs
-if common.debug == False:
-    vnf_mgmt.shut_down_VNFs(VNFs)
-    print "Shut down all active VNFs"
+VNFs = vnf_mgmt.shut_down_VNFs(VNFs)
+print "Available VNFs in the hypervisor: ", VNFs
 
 start = time.time()
 
@@ -130,7 +126,7 @@ if runmode == "vnf":
     for case in cases:
         print "Current testcase: ", case
 
-        run_analysis(analysis, config, case)
+        run_analysis(g_config, config, case)
 
     # update VNF statistics
     if common.debug == False:
@@ -152,7 +148,7 @@ elif runmode == "sc":
 
         print "Current testcase: ", case
 
-        run_analysis(analysis, config, case)
+        run_analysis(g_config, config, case)
 
     # update VNF statistics
     if common.debug == False:
@@ -170,7 +166,7 @@ elif runmode == "case":
 
     print "Current testcase: ", case
 
-    run_analysis(analysis, config, case)
+    run_analysis(g_config, config, case)
 
     # update VNF statistics
     if common.debug == False:

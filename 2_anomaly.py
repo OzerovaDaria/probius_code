@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
 # General libraries
-import sqlite3
 import math
+import sqlite3
 
 # Probius libraries
 import util

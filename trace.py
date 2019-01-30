@@ -1,12 +1,11 @@
 # General libraries
-import os
-import sys
+import os, sys
 import psutil
-import database
 from datetime import datetime
 
 # Probius libraries
 import util
+import database
 from common import trace_log
 
 tids = {}
