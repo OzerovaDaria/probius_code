@@ -5,7 +5,7 @@
 - If you find any bugs or have some questions, please send an e-mail to us.  
 
 # Configuration
-- The configuration of the Probius system: config/analysis.conf  
+- The configuration of the Probius system: config/global.conf  
 - The configurations of VNFs: config/vnf.conf  
 - The service chain policies: config/policy.conf  
 
