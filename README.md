@@ -7,7 +7,7 @@
 # Configuration
 - The configuration of the Probius system: config/global.conf  
 - The configurations of VNFs: config/vnf.conf  
-- The service chain policies: config/policy.conf  
+- Service chain policies: config/policy.conf  
 
 # Test environment
 - The current Probius is fully tested on Ubuntu 16.04.  
