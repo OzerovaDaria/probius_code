@@ -17,17 +17,18 @@
 - Psutil version = 1.2.1  
 
 # Compilation
-0. Set up a KVM environment (Management network: 192.168.254.0/24)  
+1. Clone the NFV platform for service chaining  
 $ cd ~  
-$ git clone https://github.com/sdx4u/kvm  
-1. Get the source codes of Probius  
+$ git clone https://github.com/sdx4u/sfc  
+1. Set up the framework  
+$ cd sfc  
+Follow the instructions in the README file  
+2. Clone the source codes of Probius  
 $ cd ~  
-$ git clone https://github.com/sdx4u/probius  
-2. Move to the setup directory  
-$ cd ~/probius/setup  
+$ git clone https://github.com/sdx4u/probius    
 3. Install dependencies  
+$ cd ~/probius/setup  
 $ ./deps.sh  
-5. Reboot  
 $ sudo reboot  
 
 # Execution
