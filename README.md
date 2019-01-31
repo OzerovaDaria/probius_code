@@ -32,13 +32,18 @@ Probius $ git clone https://github.com/sdx4u/probius
 Probius $ cd ~/probius/setup  
 Probius $ ./deps.sh  
 Probius $ sudo reboot  
+4. Modify the configurations for Probius  
+Probius $ cd ~/probius/config  
+Probius $ vi global.conf  
+Probius $ vi vnf.conf  
+Probius $ vi policy.conf  
 
 # Traffic Generator Installation
 1. Clone the source codes of Probius  
 TG $ cd ~  
 TG $ git clone https://github.com/sdx4u/probius  
 2. Make the symbolic link of 'workloads' directory  
-TG $ ln -s probius/workloads  
+TG $ ln -s ~/probius/workloads  
 3. Install dependencies  
 TG $ cd ~/workloads  
 TG $ ./deps.sh  
