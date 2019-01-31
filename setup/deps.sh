@@ -22,8 +22,6 @@ sudo apt-get install -y python-numpy python-scipy python-matplotlib python-panda
 sudo apt-get install -y cloc
 
 # graph-tool
-sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-sudo apt-get update
 sudo apt-key adv --keyserver pgp.skewed.de --recv-key 612DEFB798507F25
 echo "deb http://downloads.skewed.de/apt/xenial xenial universe" | sudo tee -a /etc/apt/sources.list
 echo "deb-src http://downloads.skewed.de/apt/xenial xenial universe" | sudo tee -a /etc/apt/sources.list

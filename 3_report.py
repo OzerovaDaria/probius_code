@@ -9,7 +9,7 @@ import util
 from common import analysis_database
 
 if len(sys.argv) != 2:
-    print "%s {testcase}" % (sys.argv[0])
+    print "%s [all | testcase]" % (sys.argv[0])
     exit(0)
 
 conn = sqlite3.connect(analysis_database)
@@ -30,7 +30,7 @@ for idx in range(len(testcases)):
 
     testcase = ''.join(map(str, testcase))
 
-    if testcase != sys.argv[1]:
+    if sys.argv[1] != "all" and testcase != sys.argv[1]:
         temp_list.append(case)
 
 for temp in temp_list:
