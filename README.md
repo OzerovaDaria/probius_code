@@ -43,10 +43,14 @@ $ ./1\_analysis.py case [VNF1,VNF2,VNF3,...]
 $ ./2\_anomaly.py  
 
 - Get the details of a suspicious service chain  
+$ ./3\_report.py all  
 $ ./3\_report.py [VNF1,VNF2,VNF3, ...]  
 
 - Draw state transition graphs for a suspicious service chain  
 $ ./4\_graph.py [VNF1,VNF2,VNF3, ...]  
+
+- Reset the database and other logs of the Probius  
+$ ./clean.sh  
 
 - CAUSION!  
 Please make sure that you have changed configuration files in the 'config' directory for your environment!  
