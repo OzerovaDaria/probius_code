@@ -20,29 +20,34 @@
 
 # Probius Installation
 1. Clone the NFV platform for service chaining  
-$ cd ~  
-$ git clone https://github.com/sdx4u/sfc  
+Probius $ cd ~  
+Probius $ git clone https://github.com/sdx4u/sfc  
 1. Set up the framework  
-$ cd sfc  
+Probius $ cd sfc  
 Follow the instructions in the README file  
 2. Clone the source codes of Probius  
-$ cd ~  
-$ git clone https://github.com/sdx4u/probius    
+Probius $ cd ~  
+Probius $ git clone https://github.com/sdx4u/probius    
 3. Install dependencies  
-$ cd ~/probius/setup  
-$ ./deps.sh  
-$ sudo reboot  
+Probius $ cd ~/probius/setup  
+Probius $ ./deps.sh  
+Probius $ sudo reboot  
 
 # Traffic Generator Installation
 1. Clone the source codes of Probius  
-$ cd ~  
-$ git clone https://github.com/sdx4u/probius  
+TG $ cd ~  
+TG $ git clone https://github.com/sdx4u/probius  
 2. Make the symbolic link of 'workloads' directory  
-$ ln -s probius/workloads  
+TG $ ln -s probius/workloads  
 3. Install dependencies  
-$ cd ~/workloads  
-$ ./deps.sh  
-$ sudo reboot  
+TG $ cd ~/workloads  
+TG $ ./deps.sh  
+4. Push SSH keys to each traffic generator in order to log it in without password  
+Probius $ cd ~/probius/util  
+Probius $ ./push-key.sh [userID]@[traffic generator IP address]  
+5. Modify the configurations for traffic generator  
+Probius $ cd ~/probius/config  
+Probius $ vi global.conf  
 
 # Execution
 - Analyze single VNFs  
