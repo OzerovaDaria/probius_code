@@ -15,8 +15,10 @@
 
 # Requirement
 - Psutil version = 1.2.1  
+- Three machines are required to run Probius  
+- Traffic generator (sender) - Probius - Traffic generator (receiver)  
 
-# Installation
+# Probius Installation
 1. Clone the NFV platform for service chaining  
 $ cd ~  
 $ git clone https://github.com/sdx4u/sfc  
@@ -28,6 +30,17 @@ $ cd ~
 $ git clone https://github.com/sdx4u/probius    
 3. Install dependencies  
 $ cd ~/probius/setup  
+$ ./deps.sh  
+$ sudo reboot  
+
+# Traffic Generator Installation
+1. Clone the source codes of Probius  
+$ cd ~  
+$ git clone https://github.com/sdx4u/probius  
+2. Make the symbolic link of 'workloads' directory  
+$ ln -s probius/workloads  
+3. Install dependencies  
+$ cd ~/workloads  
 $ ./deps.sh  
 $ sudo reboot  
 
