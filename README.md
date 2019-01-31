@@ -16,7 +16,7 @@
 # Requirement
 - Psutil version = 1.2.1  
 
-# Compilation
+# Installation
 1. Clone the NFV platform for service chaining  
 $ cd ~  
 $ git clone https://github.com/sdx4u/sfc  
