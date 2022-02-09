@@ -67,40 +67,19 @@ def load_VNF_configurations(conf_file):
     return config
 
 def update_VNF_configurations(config):
-    for process in psutil.process_iter():
-        try:
-            vnf = process.as_dict(attrs=['name', 'pid', 'cmdline'])
-        except psutil.NoSuchProcess:
-            pass
+    config["firewall"]["inbound"] = "2"
+    config["firewall"]["outbound"] = "3"
+    config["netsniff-ng"]["inbound"] = "4"
+    config["snort-ids"]["inbound"] = "6"
+    config["suricata-ids"]["inbound"] = "7"
 
-        for entry in vnf['cmdline']:
-            if "qemu-system-x86_64" in entry or "qemu-kvm" in entry:
-                name = vnf['cmdline'][vnf['cmdline'].index('-name') + 1]
-                if name not in config:
-                    print ("%s is not in the VNF configurations" % (name))
-                    continue
+    #config["suricata-ips"]["inbound"] =
+    #config["suricata-ips"]["outbound"] =
 
-                config[name]["pid"] = vnf['pid']
+    config["tcpdump"]["inbound"] = "9"
 
-                for entry in vnf['cmdline']:
-                    if "id=net" in entry:
-                        options = entry.split(",")
-                        print ("options : ", entry )
-
-                        id_option = options[2]
-                        net_id = id_option.split("=")[1]
-
-                        mac_option = options[3]
-                        mac = mac_option.split("=")[1]
-
-                        cmd = "virsh domiflist " + name + " | grep " + mac + " | awk '{print $1}'"
-                        res = subprocess.check_output(cmd, shell=True)
-                        intf = res.rstrip()
-
-                        config[name][net_id] = intf
-
-                config[name]["inbound"] = config[name]["net1"]
-                config[name]["outbound"] = config[name]["net2"]
+    #config["NAT"]["inbound"] =
+    #config["NAT"]["outbound"] =
 
     return config
 
@@ -338,25 +317,19 @@ def get_application_stats_of_VNFs(config, VNFs):
 
     return
 
-def get_port_from_intf(interface):
-    cmd = "util/port-map.sh | grep " + interface + " | awk '{print $2}' | head -n 1"
-    print("CMD = ", cmd)
-    res = subprocess.check_output(cmd, shell=True)
-    return res.rstrip()
-
 def make_chain_of_VNFs(config, VNFs):
     rules = []
 
     vnf_cnt = 0
     out_port = ""
 
-    rule = "sudo ovs-ofctl add-flow ovsbr0 in_port=1,actions="
+    rule = "sudo ovs-ofctl add-flow vmbr0 in_port=11,actions="
 
     for vnf in VNFs:
-        output = get_port_from_intf(config[vnf]["inbound"])
+        output = config[vnf]["inbound"]
 
         if config[vnf]["type"] == "inline":
-            out_port = get_port_from_intf(config[vnf]["outbound"])
+            out_port = config[vnf]["outbound"]
 
         if config[vnf]["type"] == "inline":
             if vnf_cnt == 0:
@@ -370,7 +343,7 @@ def make_chain_of_VNFs(config, VNFs):
             print("RULE = ", rule)
             rules.append(rule)
 
-            rule = "sudo ovs-ofctl add-flow ovsbr0 in_port=" + out_port + ",actions="
+            rule = "sudo ovs-ofctl add-flow vmbr0 in_port=" + out_port + ",actions="
         else: # passive
             if vnf_cnt == 0:
                 rule = rule + "output:" + output
@@ -380,13 +353,13 @@ def make_chain_of_VNFs(config, VNFs):
             vnf_cnt = vnf_cnt + 1
 
     if vnf_cnt == 0:
-        rule = rule + "output:2"
+        rule = rule + "output:13"
     else:
-        rule = rule + ",output:2"
+        rule = rule + ",output:13"
     print("RULE out = ", rule)
     rules.append(rule)
 
-    rule = "sudo ovs-ofctl add-flow ovsbr0 in_port=2,actions="
+    rule = "sudo ovs-ofctl add-flow vmbr0 in_port=13,actions="
 
     rev = []
 
@@ -400,12 +373,12 @@ def make_chain_of_VNFs(config, VNFs):
 
     for vnf in rev:
         if config[vnf]["type"] == "inline":
-            output = get_port_from_intf(config[vnf]["outbound"])
+            output = config[vnf]["outbound"]
         else:
-            output = get_port_from_intf(config[vnf]["inbound"])
+            output = config[vnf]["inbound"]
 
         if config[vnf]["type"] == "inline":
-            out_port = get_port_from_intf(config[vnf]["inbound"])
+            out_port = config[vnf]["inbound"]
 
         if config[vnf]["type"] == "inline":
             if vnf_cnt == 0:
@@ -416,7 +389,7 @@ def make_chain_of_VNFs(config, VNFs):
             vnf_cnt = 0
             rules.append(rule)
 
-            rule = "sudo ovs-ofctl add-flow ovsbr0 in_port=" + out_port + ",actions="
+            rule = "sudo ovs-ofctl add-flow vmbr0 in_port=" + out_port + ",actions="
         else: # passive
             if vnf_cnt == 0:
                 rule = rule + "output:" + output
@@ -426,25 +399,16 @@ def make_chain_of_VNFs(config, VNFs):
             vnf_cnt = vnf_cnt + 1
 
     if vnf_cnt == 0:
-        rule = rule + "output:1"
+        rule = rule + "output:11"
     else:
-        rule = rule + ",output:1"
+        rule = rule + ",output:11"
     print("RULE last = ", rule)
     rules.append(rule)
 
     return rules
 
 def initialize_Open_vSwitch(analysis):
-    os.system("sudo ovs-vsctl del-br ovsbr0 2> /dev/null")
-    os.system("sudo ovs-vsctl add-br ovsbr0")
-
-    os.system("sudo ovs-vsctl set-controller ovsbr0 tcp:127.0.0.1:6633")
-    os.system("sudo ovs-vsctl -- set bridge ovsbr0 protocols=OpenFlow10")
-    os.system("sudo ovs-vsctl set-fail-mode ovsbr0 secure")
-
-    os.system("sudo ovs-vsctl add-port ovsbr0 " + analysis["inbound"])
-    os.system("sudo ovs-vsctl add-port ovsbr0 " + analysis["outbound"])
-
+    os.system("sudo ovs-ofctl del-flows vmbr0")
     return
 
 def apply_chain_of_VNFs(rules):
