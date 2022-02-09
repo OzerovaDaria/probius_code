@@ -112,12 +112,11 @@ def monitor_VNF(config, vnf):
 
     conn = libvirt.open("qemu:///system")
     if conn == None:
-        print "Error: failed to connect QEMU"
+        print ("Error: failed to connect QEMU")
     else:
         dom = conn.lookupByName(vnf)
-
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        print str(vnf) + " monitors start: " + str(timestamp)
+        print (str(vnf) + " monitors start: " + str(timestamp))
 
         num_cpus, mem = get_info_of_VNF(dom)
 
@@ -398,7 +397,7 @@ def monitor_host(profile):
     host_stats = {}
 
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    print "host monitor starts: " + str(timestamp)
+    print ("host monitor starts: " + str(timestamp))
 
     first = False
     if host_info["time"] == 0.0:

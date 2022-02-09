@@ -42,7 +42,7 @@ def load_VNF_policies(VNFs, policy_file):
                 operand = line.split("&")
 
                 if operand[0] not in VNFs or operand[1] not in VNFs:
-                    print "Error: %s" % line
+                    print ("Error: %s" % line)
                     exit(-1)
 
                 policies.append({"operator":"&", "operand1":operand[0], "operand2":operand[1]})
@@ -50,7 +50,7 @@ def load_VNF_policies(VNFs, policy_file):
                 operand = line.split("|")
 
                 if operand[0] not in VNFs or operand[1] not in VNFs:
-                    print "Error: %s" % line
+                    print ("Error: %s" % line)
                     exit(-1)
 
                 policies.append({"operator":"|", "operand1":operand[0], "operand2":operand[1]})
@@ -58,7 +58,7 @@ def load_VNF_policies(VNFs, policy_file):
                 operand = line.split(">")
 
                 if operand[0] not in VNFs or operand[1] not in VNFs:
-                    print "Error: %s" % line
+                    print ("Error: %s" % line)
                     exit(-1)
 
                 policies.append({"operator":">", "operand1":operand[0], "operand2":operand[1]})

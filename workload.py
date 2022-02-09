@@ -16,10 +16,10 @@ def start_sender(g_config, VNFs, protocol, bandwidth):
     option = " "
 
     if "NAT" in VNFs:
-        print "Destination IP: " + g_config["local_receiver_nat_ip"]
+        print ("Destination IP: " + g_config["local_receiver_nat_ip"])
         option = option + g_config["local_receiver_nat_ip"]
     else:
-        print "Destination IP: " + g_config["local_receiver_ip"]
+        print ("Destination IP: " + g_config["local_receiver_ip"])
         option = option + g_config["local_receiver_ip"]
 
     if protocol == "udp":
@@ -77,7 +77,9 @@ def stop_sender_and_receiver(g_config, VNFs):
         os.system("ssh " + g_config["receiver"] + " " + g_config["stop_receiver"] + " NAT")
     else:
         os.system("ssh " + g_config["sender"] + " " + g_config["stop_sender"])
+        print ("%%%%","ssh " + g_config["sender"] + " " + g_config["stop_sender"])
         os.system("ssh " + g_config["receiver"] + " " + g_config["stop_receiver"])
+        print ("ssh " + g_config["receiver"] + " " + g_config["stop_receiver"])
 
     return
 
@@ -128,55 +130,55 @@ def send_workloads(g_config, config, VNFs, flag):
     for protocol in protocols: # TCP, UDP
         for bandwidth in bandwidths: # 200, 400, 600, 800, 1000 Mbits/s
             stop_sender_and_receiver(g_config, VNFs)
-            print "Stopped the previous sender and receiver just in case"
+            print ("Stopped the previous sender and receiver just in case")
 
             # ============ #
 
             vnf_mgmt.initialize_Open_vSwitch(g_config)
-            print "Initialized Open vSwitch"
+            print ("Initialized Open vSwitch")
 
             vnf_mgmt.power_on_VNFs(config, VNFs)
-            print "Powered on VNFs"
+            print ("Powered on VNFs")
 
             config = vnf_mgmt.update_VNF_configurations(config)
-            print "Updated VNF configurations"
+            print ("Updated VNF configurations")
 
             vnf_mgmt.start_applications_in_VNFs(config, VNFs)
-            print "Executed applications in VNFs"
+            print ("Executed applications in VNFs")
 
             rules = vnf_mgmt.make_chain_of_VNFs(config, VNFs)
-            print "Made flow rules for the chain of VNFs"
+            print ("Made flow rules for the chain of VNFs")
 
             vnf_mgmt.apply_chain_of_VNFs(rules)
-            print "Applied the chain of VNFs"
+            print ("Applied the chain of VNFs")
 
             # ============ #
 
             extras = vnf_mgmt.get_extras()
-            print "Got the information of extra processes"
+            print ("Got the information of extra processes")
 
             monitor.initialize_VNF_statistics(VNFs, extras)
-            print "Initialized VNF statistics"
+            print ("Initialized VNF statistics")
 
             start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            print "Protocol=%s, bandwidth=%sMB" % (protocol, bandwidth)
+            print ("Protocol=%s, bandwidth=%sMB" % (protocol, bandwidth))
 
             time.sleep(1.0)
 
             start_receiver(g_config, VNFs)
-            print "Executed a receiver"
+            print ("Executed a receiver")
 
             measure_latency(g_config, VNFs, False)
-            print "Measured end-to-end latencies without workloads"
+            print ("Measured end-to-end latencies without workloads")
 
             start_sender(g_config, VNFs, protocol, bandwidth)
-            print "Executed a sender (protocol=%s, bandwidth=%sMB)" % (protocol, bandwidth)
+            print ("Executed a sender (protocol=%s, bandwidth=%sMB)" % (protocol, bandwidth))
 
             time.sleep(5.0)
-            print "Started to monitor VNFs"
+            print ("Started to monitor VNFs")
 
             measure_latency(g_config, VNFs, True)
-            print "Measured end-to-end latencies with workloads"
+            print ("Measured end-to-end latencies with workloads")
 
             # ============ #
 
@@ -189,42 +191,42 @@ def send_workloads(g_config, config, VNFs, flag):
                     break
                 else:
                     time.sleep(1.0)
-            print "Stopped monitoring VNFs"
+            print ("Stopped monitoring VNFs")
 
             vnf_mgmt.get_application_stats_of_VNFs(config, VNFs)
-            print "Got the statistics of passive VNFs"
+            print ("Got the statistics of passive VNFs")
 
             # ============ #
 
             if flag == True:
                 trace.run_trace(trace_time)
-                print "Traced events"
+                print ("Traced events")
 
                 trace.analyze_trace(VNFs, protocol, bandwidth)
-                print "Analyzed the events"
+                print ("Analyzed the events")
 
             # ============ #
 
             stop_sender(g_config, VNFs)
-            print "Stopped the sender"
+            print ("Stopped the sender")
 
             stop_receiver(g_config, VNFs)
-            print "Stopped the receiver"
+            print ("Stopped the receiver")
 
             time.sleep(1.0)
 
             end_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
             database.add_testcase(VNFs, protocol, bandwidth, start_time, end_time)
-            print "Logged the start and end points of a testcase"
+            print ("Logged the start and end points of a testcase")
 
             # ============ #
 
             vnf_mgmt.stop_applications_in_VNFs(config, VNFs)
-            print "Terminated applications in VNFs"
+            print ("Terminated applications in VNFs")
 
             vnf_mgmt.shut_down_VNFs(VNFs)
-            print "Shut down VNFs"
+            print ("Shut down VNFs")
 
             # ============ #
 

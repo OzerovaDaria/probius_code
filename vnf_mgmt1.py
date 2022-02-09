@@ -3,22 +3,14 @@ import os, time, json
 import psutil 
 #import libvirt
 import subprocess
+import kvm
 from datetime import datetime
 
 # Probius libraries
 import database
-import kvm
-proxmoxx = kvm.KVM()
-proxmoxx.connect("172.30.12.2", "w4")
 
-vnf_dict = {}
-vnf_dict["firewall"] = 200
-vnf_dict["netsniff-ng"] = 201
-vnf_dict["snort-ids"] = 202
-vnf_dict["suricata-ids"] = 203
-vnf_dict["suricata-ips"] = 204
-vnf_dict["tcpdump"] = 205
-vnf_dict["NAT"] = 206
+proxmoxx = KVM()
+proxmoxx.connect("172.30.12.2", "w4")
 
 def load_VNF_configurations(conf_file):
     config = {}
@@ -85,7 +77,6 @@ def update_VNF_configurations(config):
                 for entry in vnf['cmdline']:
                     if "id=net" in entry:
                         options = entry.split(",")
-                        print ("options : ", entry )
 
                         id_option = options[2]
                         net_id = id_option.split("=")[1]
@@ -250,11 +241,32 @@ def is_VNF_alive(mgmt_ip):
         return False
 
 def is_VNF_active(vnf):
+    #res = -1
+    """
+    conn = libvirt.open("qemu:///system")
+    if conn == None:
+        print ("Error: failed to connect QEMU")
+        exit(-1)
+    else:
+        try:
+            curr = conn.lookupByName(vnf)
+            res = curr.isActive()
+            conn.close()
+        except libvirt.libvirtError:
+            pass
+    """
     print (type(vnf))
     return proxmoxx.check_status(vnf);
 
 def power_on_VNFs(config, VNFs):
     for vnf in VNFs:
+    """
+        conn = libvirt.open("qemu:///system")
+        if conn == None:
+            print ("Error: failed to connect QEMU")
+            exit(-1)
+        else:
+    """
         if is_VNF_active(vnf) == False:
             proxmoxx.startvm(vnf_dict[vnf])
             #curr = conn.lookupByName(vnf)
@@ -282,6 +294,16 @@ def shut_down_VNFs(VNFs):
         ret = is_VNF_active(vnf)
 
         if ret > 0:
+        """
+            conn = libvirt.open("qemu:///system")
+            if conn == None:
+                print ("Error: failed to connect QEMU")
+                exit (-1)
+            else:
+                VNF = conn.lookupByName(vnf)
+                VNF.destroy()
+                conn.close()
+        """
             proxmoxx.stopvm(vnf_dict[vnf])
         if ret >= 0:
             filtered.append(vnf)
@@ -305,7 +327,6 @@ def start_applications_in_VNFs(config, VNFs):
             os.system("ssh " + config[vnf]["mgmt_ip"] + " " + config[vnf]["start"] + " " + config[vnf]["nat_init"])
         else:
             os.system("ssh " + config[vnf]["mgmt_ip"] + " " + config[vnf]["start"] + " " + config[vnf]["init"])
-            print ("ssh " + config[vnf]["mgmt_ip"] + " " + config[vnf]["start"] + " " + config[vnf]["init"])
 
     return
 
@@ -340,7 +361,6 @@ def get_application_stats_of_VNFs(config, VNFs):
 
 def get_port_from_intf(interface):
     cmd = "util/port-map.sh | grep " + interface + " | awk '{print $2}' | head -n 1"
-    print("CMD = ", cmd)
     res = subprocess.check_output(cmd, shell=True)
     return res.rstrip()
 
@@ -360,14 +380,11 @@ def make_chain_of_VNFs(config, VNFs):
 
         if config[vnf]["type"] == "inline":
             if vnf_cnt == 0:
-                print("OUTPUT = ", output)
-                print(type(output))
                 rule = rule + "output:" + output
             else:
                 rule = rule + ",output:" + output
 
             vnf_cnt = 0
-            print("RULE = ", rule)
             rules.append(rule)
 
             rule = "sudo ovs-ofctl add-flow ovsbr0 in_port=" + out_port + ",actions="
@@ -383,7 +400,7 @@ def make_chain_of_VNFs(config, VNFs):
         rule = rule + "output:2"
     else:
         rule = rule + ",output:2"
-    print("RULE out = ", rule)
+
     rules.append(rule)
 
     rule = "sudo ovs-ofctl add-flow ovsbr0 in_port=2,actions="
@@ -429,7 +446,7 @@ def make_chain_of_VNFs(config, VNFs):
         rule = rule + "output:1"
     else:
         rule = rule + ",output:1"
-    print("RULE last = ", rule)
+
     rules.append(rule)
 
     return rules
