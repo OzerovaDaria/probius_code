@@ -72,10 +72,12 @@ def stop_sender_and_receiver(g_config, VNFs):
     if no_workload == True:
         return
 
+    print("function = stop_sender_and_receiver")
     if "NAT" in VNFs:
         os.system("ssh " + g_config["sender"] + " " + g_config["stop_sender"] + " NAT")
         os.system("ssh " + g_config["receiver"] + " " + g_config["stop_receiver"] + " NAT")
     else:
+        print("command = ","ssh " + g_config["sender"] + " " + g_config["stop_sender"])
         os.system("ssh " + g_config["sender"] + " " + g_config["stop_sender"])
         print ("%%%%","ssh " + g_config["sender"] + " " + g_config["stop_sender"])
         os.system("ssh " + g_config["receiver"] + " " + g_config["stop_receiver"])

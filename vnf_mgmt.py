@@ -318,6 +318,7 @@ def get_application_stats_of_VNFs(config, VNFs):
     return
 
 def make_chain_of_VNFs(config, VNFs):
+    os.system("sudo ovs-ofctl del-flows vmbr0")
     rules = []
 
     vnf_cnt = 0
@@ -409,6 +410,7 @@ def make_chain_of_VNFs(config, VNFs):
 
 def initialize_Open_vSwitch(analysis):
     os.system("sudo ovs-ofctl del-flows vmbr0")
+    os.system("sudo ovs-ofctl add-flow vmbr0 action=normal")
     return
 
 def apply_chain_of_VNFs(rules):

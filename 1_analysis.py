@@ -106,7 +106,7 @@ print ("Initialized the Probius database")
 
 # load global configurations
 g_config = load_global_configurations("config/global.conf")
-os.system("cat g_config")
+print(g_config)
 print ("Loaded global configurations")
 
 # load VNF configurations
