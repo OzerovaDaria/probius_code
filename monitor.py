@@ -2,7 +2,7 @@
 import os
 import time
 import psutil
-import libvirt
+#import libvirt
 import threading
 import subprocess
 from xml.dom import minidom
@@ -118,7 +118,7 @@ def monitor_VNF(config, vnf):
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         print (str(vnf) + " monitors start: " + str(timestamp))
 
-        num_cpus, mem = get_info_of_VNF(dom)
+        #num_cpus, mem = get_info_of_VNF(dom)
 
         vnf_stats["cpu_num"] = str(num_cpus)
 
@@ -597,6 +597,10 @@ def initialize_VNF_statistics(VNFs, extras):
         host_ext_info[extra["pid"]] = {}
         host_ext_info[extra["pid"]]["time"] = 0.0
 
+    print("GUEST_VNF_INFO")
+    print(guest_vnf_info)
+    print("HOST_VNF_INFO")
+    print(host_vnf_info)
     return
 
 

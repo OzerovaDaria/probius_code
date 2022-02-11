@@ -319,8 +319,16 @@ def get_application_stats_of_VNFs(config, VNFs):
 
 def make_chain_of_VNFs(config, VNFs):
     os.system("sudo ovs-ofctl del-flows vmbr0")
-    rules = []
+    ''' 
+    os.system("sudo ovs-ofctl add-flow vmbr0 in_port=11,actions=output:LOCAL")
+    os.system("sudo ovs-ofctl add-flow vmbr0 in_port=LOCAL,actions=output:11")
 
+    os.system("sudo ovs-ofctl add-flow vmbr0 in_port=13,actions=output:LOCAL")
+    os.system("sudo ovs-ofctl add-flow vmbr0 in_port=LOCAL,actions=output:13")    
+   
+    '''
+    rules = []
+    
     vnf_cnt = 0
     out_port = ""
 
@@ -328,10 +336,12 @@ def make_chain_of_VNFs(config, VNFs):
 
     for vnf in VNFs:
         output = config[vnf]["inbound"]
+        print("output = ",output)
 
         if config[vnf]["type"] == "inline":
             out_port = config[vnf]["outbound"]
-
+            print("out_port = ",out_port)
+        
         if config[vnf]["type"] == "inline":
             if vnf_cnt == 0:
                 print("OUTPUT = ", output)
@@ -341,6 +351,7 @@ def make_chain_of_VNFs(config, VNFs):
                 rule = rule + ",output:" + output
 
             vnf_cnt = 0
+            rule = rule + ",output:LOCAL"
             print("RULE = ", rule)
             rules.append(rule)
 
@@ -357,11 +368,12 @@ def make_chain_of_VNFs(config, VNFs):
         rule = rule + "output:13"
     else:
         rule = rule + ",output:13"
+
+    rule = rule + ",output:LOCAL"
     print("RULE out = ", rule)
     rules.append(rule)
 
-    rule = "sudo ovs-ofctl add-flow vmbr0 in_port=13,actions="
-
+    rule = "sudo ovs-ofctl add-flow vmbr0 in_port=13,actions="    
     rev = []
 
     for vnf in VNFs:
@@ -388,6 +400,7 @@ def make_chain_of_VNFs(config, VNFs):
                 rule = rule + ",output:" + output
 
             vnf_cnt = 0
+            rule = rule + ",output:LOCAL"
             rules.append(rule)
 
             rule = "sudo ovs-ofctl add-flow vmbr0 in_port=" + out_port + ",actions="
@@ -403,9 +416,10 @@ def make_chain_of_VNFs(config, VNFs):
         rule = rule + "output:11"
     else:
         rule = rule + ",output:11"
+    rule = rule + ",output:LOCAL"
     print("RULE last = ", rule)
     rules.append(rule)
-
+    rules.append("sudo ovs-ofctl add-flow vmbr0 in_port=LOCAL,actions=output:13,output:11")
     return rules
 
 def initialize_Open_vSwitch(analysis):

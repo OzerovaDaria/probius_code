@@ -131,13 +131,13 @@ def send_workloads(g_config, config, VNFs, flag):
 
     for protocol in protocols: # TCP, UDP
         for bandwidth in bandwidths: # 200, 400, 600, 800, 1000 Mbits/s
+            vnf_mgmt.initialize_Open_vSwitch(g_config)
+            print ("Initialized Open vSwitch")
+
             stop_sender_and_receiver(g_config, VNFs)
             print ("Stopped the previous sender and receiver just in case")
 
             # ============ #
-
-            vnf_mgmt.initialize_Open_vSwitch(g_config)
-            print ("Initialized Open vSwitch")
 
             vnf_mgmt.power_on_VNFs(config, VNFs)
             print ("Powered on VNFs")
