@@ -184,8 +184,8 @@ def send_workloads(g_config, config, VNFs, flag):
 
             # ============ #
 
-            monitor.monitor_VNFs(g_config, config, VNFs, extras, monitor_time)
-
+            #monitor.monitor_VNFs(g_config, config, VNFs, extras, monitor_time)
+            monitor.monitor_VNF(config, "tcpdump")
             # ============ #
 
             while True: # waiting until all monitoring threads are terminated

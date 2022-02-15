@@ -13,21 +13,29 @@ from datetime import datetime
 import util
 import vnf_mgmt
 import database
+import json
+import kvm
 
 guest_vnf_info = {}
 host_vnf_info = {}
 host_ext_info = {}
 host_info = {}
 host_nic = {}
-'''
-def get_info_of_VNF(dom):
-    state, maxmem, mem, num_cpus, cpu_time = dom.info()
 
+proxmoxx = kvm.KVM()
+proxmoxx.connect("172.30.12.2", "w4")
+
+
+def get_info_of_VNF(resp1):
+    #state, maxmem, mem, num_cpus, cpu_time = dom.info()
+    num_cpus = resp1["cpus"]
+    mem = resp1["mem"]
     mem /= 1024. # KB -> MB
-    cpu_time /= 1000000000. # ns -> sec
+    #cpu_time /= 1000000000. # ns -> sec
 
     return num_cpus, mem
 
+'''
 def get_cpu_stats_of_VNF(dom):
     stats = {}
 
@@ -49,42 +57,29 @@ def get_cpu_stats_of_VNF(dom):
     stats["system_time"] = system_time
 
     return stats
-
-def get_mem_stats_of_VNF(dom):
-    stats = dom.memoryStats()
-
+'''
+def get_mem_stats_of_VNF(resp1):
+    #stats = dom.memoryStats()
+    stats = {}
+    stats["actual"] = resp1["ballooninfo"]["actual"]
+    stats["swap_in"] = resp1["ballooninfo"]["mem_swapped_in"]
     stats["actual"] /= 1024. # KB -> MB
     stats["swap_in"] /= 1024. # KB -> MB
-    stats["rss"] /= 1024. # KB -> MB
+    #stats["rss"] /= 1024. # KB -> MB
 
     return stats
 
-def get_disk_stats_of_VNF(dom):
+def get_disk_stats_of_VNF(resp1):
     stats = {}
+    stats["read_count"] = resp1["blockstat"]["scsi0"]["rd_operations"] * 1.0
+    stats["read_bytes"] = resp1["blockstat"]["scsi0"]["rd_bytes"] * 1.0
+    stats["write_count"] = resp1["blockstat"]["scsi0"]["wr_operations"] * 1.0
+    stats["write_bytes"] = resp1["blockstat"]["scsi0"]["wr_bytes"] * 1.0
 
-    block = ''
-    raw_xml = dom.XMLDesc(0)
-    xml = minidom.parseString(raw_xml)
-    diskTypes = xml.getElementsByTagName('disk')
-    for diskType in diskTypes:
-        if diskType.getAttribute('device') == 'disk':
-            diskNodes = diskType.childNodes
-            for diskNode in diskNodes:
-                if diskNode.nodeName == 'source':
-                    block = str(diskNode.attributes['file'].value)
-                    break
-            break
-
-    rd_req, rd_bytes, wr_req, wr_bytes, err = dom.blockStats(block)
-
-    stats["read_count"] = rd_req * 1.0
-    stats["read_bytes"] = rd_bytes * 1.0
-    stats["write_count"] = wr_req * 1.0
-    stats["write_bytes"] = wr_bytes * 1.0
-    stats["error"] = err * 1.0
-
+    #stats["error"] = err * 1.0
+    
     return stats
-
+'''
 def get_net_stats_of_VNF(dom):
     stats = {}
 
@@ -105,24 +100,41 @@ def get_net_stats_of_VNF(dom):
         stats[intf]["bytes_sent"] = istats[4] * 1.0
 
     return stats
-
+'''
 # libvirt
 def monitor_VNF(config, vnf):
     vnf_stats = {}
-
+    resp1 = proxmoxx.proxmox().nodes('w4').qemu(210).status.current.get()
+    #print("maxmem", resp1["maxmem"])
+    b = json.dumps(resp1, indent=2)
+    #print(b)
+    print("STATUS = ", resp1["status"])
+    print("MEM = ", resp1["mem"])
+    print("CPUS = ", resp1["cpus"])
+    print("ACTUAL MEM = ", resp1["ballooninfo"]["actual"])
+    print("MEM SWAP_IN = ", resp1["ballooninfo"]["mem_swapped_in"])
+    print("DISC_READ_COUNT = ", resp1["blockstat"]["scsi0"]["rd_operations"])
+    print("DISC_WRITE_COUNT = ", resp1["blockstat"]["scsi0"]["wr_operations"])
+    print("DISC_READ_BYTES = ", resp1["blockstat"]["scsi0"]["rd_bytes"])
+    print("DISC_WRITE_BYTES = ", resp1["blockstat"]["scsi0"]["wr_bytes"])
+    print("$$$$$$$$$$$$$$$$$$$$$$$$$$")
+    '''    
     conn = libvirt.open("qemu:///system")
     if conn == None:
         print ("Error: failed to connect QEMU")
     else:
         dom = conn.lookupByName(vnf)
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        print (str(vnf) + " monitors start: " + str(timestamp))
+    '''
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    print (str(vnf) + " monitors start: " + str(timestamp))
 
-        #num_cpus, mem = get_info_of_VNF(dom)
+    num_cpus, mem = get_info_of_VNF(resp1)
+    print("num_cpus, mem = ", num_cpus, mem)
+    print()
+    vnf_stats["cpu_num"] = str(num_cpus)
 
-        vnf_stats["cpu_num"] = str(num_cpus)
-
-        first = False
+    first = False
+    '''    
         if guest_vnf_info[vnf]["time"] == 0.0:
             first = True
 
@@ -144,29 +156,30 @@ def monitor_VNF(config, vnf):
         guest_vnf_info[vnf]["vcpu_time"] = cpu_stats["vcpu_time"]
         guest_vnf_info[vnf]["user_time"] = cpu_stats["user_time"]
         guest_vnf_info[vnf]["system_time"] = cpu_stats["system_time"]
+    '''
+    mem_stats = get_mem_stats_of_VNF(resp1)
 
-        mem_stats = get_mem_stats_of_VNF(dom)
+    vnf_stats["total_mem"] = str(mem)
+    #vnf_stats["rss_mem"] = str(mem_stats["rss"])
 
-        vnf_stats["total_mem"] = str(mem)
-        vnf_stats["rss_mem"] = str(mem_stats["rss"])
+    disk_stats = get_disk_stats_of_VNF(resp1)
+    print("disk_stats[read_count] = ", disk_stats["read_count"])
+    
+    if first == False:
+        vnf_stats["read_count"] = str((disk_stats["read_count"] - guest_vnf_info[vnf]["read_count"]) \
+                                       / (tm - guest_vnf_info[vnf]["time"]))
+        vnf_stats["read_bytes"] = str((disk_stats["read_bytes"] - guest_vnf_info[vnf]["read_bytes"]) \
+                                       / (tm - guest_vnf_info[vnf]["time"]))
+        vnf_stats["write_count"] = str((disk_stats["write_count"] - guest_vnf_info[vnf]["write_count"]) \
+                                       / (tm - guest_vnf_info[vnf]["time"]))
+        vnf_stats["write_bytes"] = str((disk_stats["write_bytes"] - guest_vnf_info[vnf]["write_bytes"]) \
+                                       / (tm - guest_vnf_info[vnf]["time"]))
 
-        disk_stats = get_disk_stats_of_VNF(dom)
-
-        if first == False:
-            vnf_stats["read_count"] = str((disk_stats["read_count"] - guest_vnf_info[vnf]["read_count"]) \
-                                           / (tm - guest_vnf_info[vnf]["time"]))
-            vnf_stats["read_bytes"] = str((disk_stats["read_bytes"] - guest_vnf_info[vnf]["read_bytes"]) \
-                                           / (tm - guest_vnf_info[vnf]["time"]))
-            vnf_stats["write_count"] = str((disk_stats["write_count"] - guest_vnf_info[vnf]["write_count"]) \
-                                           / (tm - guest_vnf_info[vnf]["time"]))
-            vnf_stats["write_bytes"] = str((disk_stats["write_bytes"] - guest_vnf_info[vnf]["write_bytes"]) \
-                                           / (tm - guest_vnf_info[vnf]["time"]))
-
-        guest_vnf_info[vnf]["read_count"] = disk_stats["read_count"]
-        guest_vnf_info[vnf]["read_bytes"] = disk_stats["read_bytes"]
-        guest_vnf_info[vnf]["write_count"] = disk_stats["write_count"]
-        guest_vnf_info[vnf]["write_bytes"] = disk_stats["write_bytes"]
-
+    guest_vnf_info[vnf]["read_count"] = disk_stats["read_count"]
+    guest_vnf_info[vnf]["read_bytes"] = disk_stats["read_bytes"]
+    guest_vnf_info[vnf]["write_count"] = disk_stats["write_count"]
+    guest_vnf_info[vnf]["write_bytes"] = disk_stats["write_bytes"]
+    '''
         net_stats = get_net_stats_of_VNF(dom)
 
         for intf in net_stats:
@@ -206,10 +219,10 @@ def monitor_VNF(config, vnf):
             database.guest_vnf_info(vnf, timestamp, vnf_stats)
 
         guest_vnf_info[vnf]["time"] = tm
-
+    '''
     return
-'''
-# psutil
+
+# inserted
 def monitor_host_VNF(config, vnf):
     vnf_stats = {}
 
@@ -221,10 +234,10 @@ def monitor_host_VNF(config, vnf):
     p = psutil.Process(config[vnf]["pid"])
 
     # cpu_num
-    vnf_stats["cpu_num"] = str(len(p.get_cpu_affinity()))
+    vnf_stats["cpu_num"] = str(len(p.cpu_affinity()))
 
     # cpu_affinity
-    affinity = p.get_cpu_affinity()
+    affinity = p.cpu_affinity()
 
     vnf_stats["cpu_affinity"] = ""
     for index in range(len(affinity)):
@@ -234,7 +247,7 @@ def monitor_host_VNF(config, vnf):
             vnf_stats["cpu_affinity"] = vnf_stats["cpu_affinity"] + "," + str(affinity[index])
 
     # cpu_percent
-    vnf_stats["cpu_percent"] = str(p.get_cpu_percent(interval=0.5))
+    vnf_stats["cpu_percent"] = str(p.cpu_percent(interval=0.5))
 
     first = False
     if host_vnf_info[vnf]["time"] == 0.0:
@@ -243,8 +256,10 @@ def monitor_host_VNF(config, vnf):
     tm = time.time()
 
     # user_time, system_time
-    user_time, system_time = p.get_cpu_times()
-
+    cpu_times = p.cpu_times()
+    user_time = cpu_times[0]
+    system_time = cpu_times[1]
+    
     if first == False:
         vnf_stats["user_time"] = str((user_time - host_vnf_info[vnf]["user_time"]) / (tm - host_vnf_info[vnf]["time"]))
         vnf_stats["system_time"] = str((system_time - host_vnf_info[vnf]["system_time"]) / (tm - host_vnf_info[vnf]["time"]))
@@ -253,27 +268,35 @@ def monitor_host_VNF(config, vnf):
     host_vnf_info[vnf]["system_time"] = system_time
 
     # mem_percent
-    vnf_stats["mem_percent"] = str(p.get_memory_percent())
+    vnf_stats["mem_percent"] = str(p.memory_percent())
 
     # total_mem, rss_mem
-    rss, vms = p.get_memory_info()
+    mi = p.memory_info()
+    print(mi)
+    rss = mi[0]
+    vms = mi[1]
 
     vnf_stats["total_mem"] = str(int(config[vnf]["mem"]) * 1.0)
     vnf_stats["rss_mem"]  = str(rss / (1024. * 1024.))
 
     # io counter
     if os.getuid() == 0:
-        read_count, read_bytes, write_count, write_bytes = p.get_io_counters()
+        io_counters =  p.io_counters()
+
+        read_count = io_counters[0]
+        read_bytes = io_counters[1]
+        write_count = io_counters[2]
+        write_bytes = io_counters[3]
 
         if first == False:
             vnf_stats["read_count"] = str((read_count * 1.0 - host_vnf_info[vnf]["read_count"]) / (tm - host_vnf_info[vnf]["time"]))
             vnf_stats["read_bytes"] = str((read_bytes * 1.0 - host_vnf_info[vnf]["read_bytes"]) / (tm - host_vnf_info[vnf]["time"]))
             vnf_stats["write_count"] = str((write_count * 1.0 - host_vnf_info[vnf]["write_count"]) / (tm - host_vnf_info[vnf]["time"]))
             vnf_stats["write_bytes"] = str((write_bytes * 1.0 - host_vnf_info[vnf]["write_bytes"]) / (tm - host_vnf_info[vnf]["time"]))
-
+            
         host_vnf_info[vnf]["read_count"] = read_count * 1.0
         host_vnf_info[vnf]["read_bytes"] = read_bytes * 1.0
-        host_vnf_info[vnf]["write_count"] = write_count * 1.0
+	host_vnf_info[vnf]["write_count"] = write_count * 1.0
         host_vnf_info[vnf]["write_bytes"] = write_bytes * 1.0
     else:
         vnf_stats["read_count"] = "0.0"
@@ -282,10 +305,12 @@ def monitor_host_VNF(config, vnf):
         vnf_stats["write_bytes"] = "0.0"
 
     # num_threads
-    vnf_stats["num_threads"] = str(p.get_num_threads() * 1.0)
+    vnf_stats["num_threads"] = str(p.num_threads() * 1.0)
 
     # context switches
-    vol_ctx, invol_ctx = p.get_num_ctx_switches()
+    ctx_sw = p.num_ctx_switches()
+    vol_ctx = ctx_sw[0]
+    invol_ctx = ctx_sw[1]
 
     if first == False:
         vnf_stats["vol_ctx"] = str((vol_ctx * 1.0 - host_vnf_info[vnf]["vol_ctx"]) / (tm - host_vnf_info[vnf]["time"]))
@@ -299,6 +324,9 @@ def monitor_host_VNF(config, vnf):
         database.host_VNF_info(vnf, timestamp, vnf_stats)
 
     host_vnf_info[vnf]["time"] = tm
+    print("vnf_stats", vnf_stats)
+
+    print("host_vnf_info", host_vnf_info)
 
     return
 
@@ -402,8 +430,9 @@ def monitor_host_extra(config, extra):
     print("host_ext_info", host_ext_info)
     return
 
+# inserted
 # psutil
-def monitor_host(profile):
+def monitor_host():
     host_stats = {}
 
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -419,7 +448,17 @@ def monitor_host(profile):
     tm = time.time()
 
     # cpu_times
-    user, nice, system, idle, iowait, irq, softirq, steal, guest, guest_nice = psutil.cpu_times()
+    cpu_times = psutil.cpu_times()
+    user = cpu_times[0] 
+    nice = cpu_times[1] 
+    system = cpu_times[2] 
+    idle = cpu_times[3] 
+    iowait = cpu_times[4] 
+    irq = cpu_times[5] 
+    softirq = cpu_times[6] 
+    steal = cpu_times[7] 
+    guest = cpu_times[8] 
+    guest_nice = cpu_times[9] 
 
     if first == False:
         host_stats["user_time"] = str((user - host_info["user_time"]) / (tm - host_info["time"]))
@@ -445,9 +484,17 @@ def monitor_host(profile):
     host_info["guest_nice_time"] = guest_nice
 
     # mem_percent, total_mem, used_mem, available_mem
-    total_mem, available_mem, mem_percent, used_mem, free_mem, \
-        active_mem, inactive_mem, buffers_mem, cached_mem = psutil.virtual_memory()
-
+    virt_mem = psutil.virtual_memory()
+    total_mem = virt_mem[0]
+    available_mem = virt_mem[1]
+    mem_percent = virt_mem[2]
+    used_mem = virt_mem[3]
+    free_mem = virt_mem[4]
+    active_mem = virt_mem[5]
+    inactive_mem = virt_mem[6]
+    buffers_mem = virt_mem[7]
+    cached_mem = virt_mem[8]
+    
     host_stats["mem_percent"] = str(mem_percent)
 
     host_stats["total_mem"] = str(total_mem / (1024. * 1024.))
@@ -459,7 +506,7 @@ def monitor_host(profile):
     host_stats["buffers_mem"] = str(buffers_mem / (1024. * 1024.))
     host_stats["cached_mem"] = str(cached_mem / (1024. * 1024.))
 
-    read_count, write_count, read_bytes, write_bytes, read_time, write_time = psutil.disk_io_counters()
+    read_count, write_count, read_bytes, write_bytes, read_time, write_time, rmc, wmc, hzc = psutil.disk_io_counters()
 
     if first == False:
         host_stats["read_count"] = str((read_count * 1.0 - host_info["read_count"]) / (tm - host_info["time"]))
@@ -478,7 +525,7 @@ def monitor_host(profile):
     interfaces = psutil.net_io_counters(pernic=True)
     for interface in interfaces:
         host_nets = {}
-
+        '''
         if interface == profile["inbound"] or interface == profile["outbound"]:
             bytes_sent, bytes_recv, packets_sent, packets_recv, \
                 errin, errout, dropin, dropout = interfaces[interface]
@@ -553,10 +600,14 @@ def monitor_host(profile):
 
             if "interface" in host_nets:
                 database.host_net(timestamp, host_nets)
-
+        '''
     host_info["time"] = tm
+    print("host_stats: ",host_stats)
 
+    print("host_info: ",host_info)
     return
+			
+		
 
 def create_monitor_threads_per_VNF(profile, config, VNFs, extras):
     threads = []
@@ -619,8 +670,8 @@ def monitor_VNFs(profile, config, VNFs, extras, monitor_time, monitored=0):
 
     create_monitor_threads_per_VNF(profile, config, VNFs, extras)
 
-#    if monitored < monitor_time:
-#        threading.Timer(1, monitor_VNFs, args=(profile, config, VNFs, extras, monitor_time, monitored)).start()
+    if monitored < monitor_time:
+        threading.Timer(1, monitor_VNFs, args=(profile, config, VNFs, extras, monitor_time, monitored)).start()
 
     time.sleep((monitor_time - monitored) * 1.0)
 
