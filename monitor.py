@@ -19,7 +19,7 @@ host_vnf_info = {}
 host_ext_info = {}
 host_info = {}
 host_nic = {}
-
+'''
 def get_info_of_VNF(dom):
     state, maxmem, mem, num_cpus, cpu_time = dom.info()
 
@@ -208,7 +208,7 @@ def monitor_VNF(config, vnf):
         guest_vnf_info[vnf]["time"] = tm
 
     return
-
+'''
 # psutil
 def monitor_host_VNF(config, vnf):
     vnf_stats = {}
@@ -302,7 +302,7 @@ def monitor_host_VNF(config, vnf):
 
     return
 
-# psutil
+# inserted
 def monitor_host_extra(config, extra):
     ext_stats = {}
 
@@ -317,10 +317,10 @@ def monitor_host_extra(config, extra):
     p = psutil.Process(pid)
 
     # cpu_num
-    ext_stats["cpu_num"] = str(len(p.get_cpu_affinity()))
+    ext_stats["cpu_num"] = str(len(p.cpu_affinity()))
 
     # cpu_affinity
-    affinity = p.get_cpu_affinity()
+    affinity = p.cpu_affinity()
 
     ext_stats["cpu_affinity"] = ""
     for index in range(len(affinity)):
@@ -330,7 +330,7 @@ def monitor_host_extra(config, extra):
             ext_stats["cpu_affinity"] = ext_stats["cpu_affinity"] + "," + str(affinity[index])
 
     # cpu_percent
-    ext_stats["cpu_percent"] = str(p.get_cpu_percent(interval=0.5))
+    ext_stats["cpu_percent"] = str(p.cpu_percent(interval=0.5))
 
     first = False
     if host_ext_info[pid]["time"] == 0.0:
@@ -339,7 +339,9 @@ def monitor_host_extra(config, extra):
     tm = time.time()
 
     # user_time, system_time
-    user_time, system_time = p.get_cpu_times()
+    cpu_times = p.cpu_times()
+    user_time = cpu_times[0]
+    system_time = cpu_times[1]
 
     if first == False:
         ext_stats["user_time"] = str((user_time - host_ext_info[pid]["user_time"]) / (tm - host_ext_info[pid]["time"]))
@@ -349,18 +351,22 @@ def monitor_host_extra(config, extra):
     host_ext_info[pid]["system_time"] = system_time
 
     # mem_percent
-    ext_stats["mem_percent"] = str(p.get_memory_percent())
+    ext_stats["mem_percent"] = str(p.memory_percent())
 
     # io counter
     if os.getuid() == 0:
-        read_count, read_bytes, write_count, write_bytes = p.get_io_counters()
+        io_counters = p.io_counters()
+        read_count = io_counters[0]
+        read_bytes = io_counters[1]
+        write_count = io_counters[2]
+        write_bytes = io_counters[3]
 
         if first == False:
             ext_stats["read_count"] = str((read_count * 1.0 - host_ext_info[pid]["read_count"]) / (tm - host_ext_info[pid]["time"]))
             ext_stats["read_bytes"] = str((read_bytes * 1.0 - host_ext_info[pid]["read_bytes"]) / (tm - host_ext_info[pid]["time"]))
             ext_stats["write_count"] = str((write_count * 1.0 - host_ext_info[pid]["write_count"]) / (tm - host_ext_info[pid]["time"]))
             ext_stats["write_bytes"] = str((write_bytes * 1.0 - host_ext_info[pid]["write_bytes"]) / (tm - host_ext_info[pid]["time"]))
-
+    
         host_ext_info[pid]["read_count"] = read_count * 1.0
         host_ext_info[pid]["read_bytes"] = read_bytes * 1.0
         host_ext_info[pid]["write_count"] = write_count * 1.0
@@ -372,10 +378,12 @@ def monitor_host_extra(config, extra):
         ext_stats["write_bytes"] = "0.0"
 
     # num_threads
-    ext_stats["num_threads"] = str(p.get_num_threads() * 1.0)
+    ext_stats["num_threads"] = str(p.num_threads() * 1.0)
 
     # context switches
-    vol_ctx, invol_ctx = p.get_num_ctx_switches()
+    ctx_switches = p.num_ctx_switches()
+    vol_ctx = ctx_switches[0]
+    invol_ctx = ctx_switches[1]
 
     if first == False:
         ext_stats["vol_ctx"] = str((vol_ctx * 1.0 - host_ext_info[pid]["vol_ctx"]) / (tm - host_ext_info[pid]["time"]))
@@ -390,6 +398,8 @@ def monitor_host_extra(config, extra):
 
     host_ext_info[pid]["time"] = tm
 
+    print("ext_stats", ext_stats)
+    print("host_ext_info", host_ext_info)
     return
 
 # psutil
@@ -564,12 +574,12 @@ def create_monitor_threads_per_VNF(profile, config, VNFs, extras):
     for extra in extras:
         t = threading.Thread(target=monitor_host_extra, args=(config, extra,))
         threads.append(t)
-
+    '''
     # guest-side VNF monitor
     for vnf in VNFs:
         t = threading.Thread(target=monitor_VNF, args=(config, vnf,))
         threads.append(t)
-
+    '''
     # start threads
     for thread in threads:
         thread.start()
@@ -609,8 +619,8 @@ def monitor_VNFs(profile, config, VNFs, extras, monitor_time, monitored=0):
 
     create_monitor_threads_per_VNF(profile, config, VNFs, extras)
 
-    if monitored < monitor_time:
-        threading.Timer(1, monitor_VNFs, args=(profile, config, VNFs, extras, monitor_time, monitored)).start()
+#    if monitored < monitor_time:
+#        threading.Timer(1, monitor_VNFs, args=(profile, config, VNFs, extras, monitor_time, monitored)).start()
 
     time.sleep((monitor_time - monitored) * 1.0)
 
