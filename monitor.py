@@ -104,7 +104,8 @@ def get_net_stats_of_VNF(dom):
 # libvirt
 def monitor_VNF(config, vnf):
     vnf_stats = {}
-    resp1 = proxmoxx.proxmox().nodes('w4').qemu(210).status.current.get()
+    vmid = config[vnf]["vmid"]
+    resp1 = proxmoxx.proxmox().nodes('w4').qemu(vmid).status.current.get()
     #print("maxmem", resp1["maxmem"])
     b = json.dumps(resp1, indent=2)
     #print(b)
@@ -293,10 +294,10 @@ def monitor_host_VNF(config, vnf):
             vnf_stats["read_bytes"] = str((read_bytes * 1.0 - host_vnf_info[vnf]["read_bytes"]) / (tm - host_vnf_info[vnf]["time"]))
             vnf_stats["write_count"] = str((write_count * 1.0 - host_vnf_info[vnf]["write_count"]) / (tm - host_vnf_info[vnf]["time"]))
             vnf_stats["write_bytes"] = str((write_bytes * 1.0 - host_vnf_info[vnf]["write_bytes"]) / (tm - host_vnf_info[vnf]["time"]))
-            
+
         host_vnf_info[vnf]["read_count"] = read_count * 1.0
         host_vnf_info[vnf]["read_bytes"] = read_bytes * 1.0
-	host_vnf_info[vnf]["write_count"] = write_count * 1.0
+        host_vnf_info[vnf]["write_count"] = write_count * 1.0
         host_vnf_info[vnf]["write_bytes"] = write_bytes * 1.0
     else:
         vnf_stats["read_count"] = "0.0"

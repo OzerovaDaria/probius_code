@@ -10,7 +10,7 @@ import database
 import kvm
 proxmoxx = kvm.KVM()
 proxmoxx.connect("172.30.12.2", "w4")
-
+'''
 vnf_dict = {}
 vnf_dict["firewall"] = 200
 vnf_dict["netsniff-ng"] = 201
@@ -19,7 +19,7 @@ vnf_dict["suricata-ids"] = 203
 vnf_dict["suricata-ips"] = 204
 vnf_dict["tcpdump"] = 205
 vnf_dict["NAT"] = 206
-
+'''
 def load_VNF_configurations(conf_file):
     config = {}
 
@@ -31,7 +31,7 @@ def load_VNF_configurations(conf_file):
 
             config[name]["name"] = str(name) # VNF name in a configuration
             config[name]["type"] = str(data[name]["type"]) # passive or inline
-
+            config[name]["vmid"] = data[name]["vmid"] # virtual machine ID
             config[name]["pid"] = "" # Process ID
 
             config[name]["net0"] = "" # mgmt virtual interface
@@ -250,16 +250,19 @@ def is_VNF_active(vnf):
 def power_on_VNFs(config, VNFs):
     for vnf in VNFs:
         if is_VNF_active(vnf) == False:
-            proxmoxx.startvm(vnf_dict[vnf])
+            proxmoxx.startvm(config[vnf]["vmid"])
+            #proxmoxx.startvm(vnf_dict[vnf])
             #curr = conn.lookupByName(vnf)
             #curr.create()
             #conn.close()
         else: # True
             #curr = conn.lookupByName(vnf)
             #curr.destroy()
-            proxmoxx.stopvm(vnf_dict[vnf])
+            proxmoxx.stopvm(config[vnf]["vmid"])
+            #proxmoxx.stopvm(config[vnf]["vmid"])
             time.sleep(1.0)
-            proxmoxx.startvm(vnf_dict[vnf])
+            proxmoxx.startvm(config[vnf]["vmid"])
+            #proxmoxx.startvm(vnf_dict[vnf])
 
     for vnf in VNFs:
         power_on = False
@@ -269,14 +272,15 @@ def power_on_VNFs(config, VNFs):
 
     return
 
-def shut_down_VNFs(VNFs):
+def shut_down_VNFs(config, VNFs):
     filtered = []
 
     for vnf in VNFs:
         ret = is_VNF_active(vnf)
 
         if ret > 0:
-            proxmoxx.stopvm(vnf_dict[vnf])
+            proxmoxx.stopvm(config[vnf]["vmid"])
+            #proxmoxx.stopvm(vnf_dict[vnf])
         if ret >= 0:
             filtered.append(vnf)
 

@@ -122,7 +122,7 @@ policies = testcase.load_VNF_policies(VNFs, "config/policy.conf")
 print ("Loaded VNF policies")
 
 # shut down the active VNFs
-VNFs = vnf_mgmt.shut_down_VNFs(VNFs)
+VNFs = vnf_mgmt.shut_down_VNFs(config, VNFs)
 print ("Available VNFs in the hypervisor: ", VNFs)
 
 start = time.time()
