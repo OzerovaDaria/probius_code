@@ -19,13 +19,15 @@ def run_trace(trace_time):
         except psutil.NoSuchProcess:
             pass
 
-        if "qemu-system-x86_64" not in ps["name"] and "qemu-kvm" not in ps["name"] and "vhost-" not in ps["name"]:
+        if "kvm" not in ps["name"] and "vhost-" not in ps["name"]:
             continue
 
         p = psutil.Process(ps['pid'])
-        threads = p.get_threads()
+        threads = p.threads()
         for thread in threads:
-            tid, user_time, system_time = thread
+            tid = thread[0]
+            user_time = thread[1]
+            system_time = thread[2]
             tids[str(tid)] = str(ps['pid'])
 
     events = "-e kvm:*"

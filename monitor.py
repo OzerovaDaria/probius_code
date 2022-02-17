@@ -135,12 +135,12 @@ def monitor_VNF(config, vnf):
     vnf_stats["cpu_num"] = str(num_cpus)
 
     first = False
-    '''    
-        if guest_vnf_info[vnf]["time"] == 0.0:
-            first = True
+        
+    if guest_vnf_info[vnf]["time"] == 0.0:
+        first = True
 
-        tm = time.time()
-
+    tm = time.time()
+    '''
         cpu_stats = get_cpu_stats_of_VNF(dom)
 
         if first == False:
@@ -433,7 +433,7 @@ def monitor_host_extra(config, extra):
 
 # inserted
 # psutil
-def monitor_host():
+def monitor_host(profile):
     host_stats = {}
 
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')

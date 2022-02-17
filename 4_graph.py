@@ -42,13 +42,13 @@ def generate_graphs(testcase):
     e_colors = {}
     e_times = {}
 
-    print "testcase | protocol | bandwidth | vnf | cpu_nums | " + \
+    print ( "testcase | protocol | bandwidth | vnf | cpu_nums | " + \
           "Computation | Initialization | Hard switch | Soft switch | " + \
           "Memory access | I/O operation | Interrupt | Idleness | " + \
           "Lock contention | IRQ | Others | Outside | " + \
           "MSR_WRITE | EXTERNAL_INTERRUPT | PAUSE_INSTRUCTION | " + \
           "EPT_VIOLATION | IO_INSTRUCTION | EXCEPTION_NMI | " + \
-          "EPT_MISCONFIG | HLT"
+          "EPT_MISCONFIG | HLT" )
      
     for _case in _testcase:
         case= _case[0]
@@ -612,7 +612,7 @@ def generate_graphs(testcase):
                     unknown_time += e_time[e]
                     unknown_count += e_count[e]
 
-            print "%s | %s | %s | %s | %s | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d | " + \
+            print ("%s | %s | %s | %s | %s | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d | " + \
                   "%f | %d | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d | " + \
                   "%f | %d | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d | %f | %d" % \
                   (case, protocol, bandwidth, vnf, str(cpu_nums[vnf]), \
@@ -623,7 +623,7 @@ def generate_graphs(testcase):
                    unknown_time, unknown_count, out_time, out_count, \
                    msr_time, msr_count, exter_time, exter_count, pause_time, pause_count, \
                    vio_time, vio_count, ioins_time, ioins_count, nmi_time, nmi_count, \
-                   mis_time, mis_count, hlt_time, hlt_count)
+                   mis_time, mis_count, hlt_time, hlt_count))
 
             k += 1
 
@@ -701,5 +701,5 @@ if __name__ == '__main__':
         testcase = sys.argv[1]
         generate_graphs(testcase)
     else:
-        print "%s {testcase}" % (sys.argv[0])
+        print ("%s {testcase}" % (sys.argv[0]))
         exit(0)

@@ -75,6 +75,7 @@ def run_analysis(g_config, config, case):
             if common.debug == False:
                 print("Here!")
                 # send workload (run monitor and trace)
+                
                 workload.send_workloads(g_config, config, case, common.trace_state_transitions)
                 print ("5")
 
@@ -112,6 +113,7 @@ print ("Loaded global configurations")
 # load VNF configurations
 config = vnf_mgmt.load_VNF_configurations("config/vnf.conf")
 print ("Loaded VNF configurations")
+print(config)
 
 # get the list of VNFs
 VNFs = vnf_mgmt.get_list_of_VNFs(config)
@@ -122,9 +124,8 @@ policies = testcase.load_VNF_policies(VNFs, "config/policy.conf")
 print ("Loaded VNF policies")
 
 # shut down the active VNFs
-VNFs = vnf_mgmt.shut_down_VNFs(config, VNFs)
+#VNFs = vnf_mgmt.shut_down_VNFs(config, VNFs)
 print ("Available VNFs in the hypervisor: ", VNFs)
-
 start = time.time()
 
 # analyze single VNFs only (ground truths)

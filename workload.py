@@ -32,7 +32,7 @@ def start_sender(g_config, VNFs, protocol, bandwidth):
         os.system("ssh " + g_config["sender"] + " " + g_config["run_sender"] + " NAT " + option)
     else:
         os.system("ssh " + g_config["sender"] + " " + g_config["run_sender"] + " " + option)
-
+        print("ssh " + g_config["sender"] + " " + g_config["run_sender"] + " " + option)
     return
 
 def stop_sender(g_config, VNFs):
@@ -139,8 +139,8 @@ def send_workloads(g_config, config, VNFs, flag):
 
             # ============ #
 
-            vnf_mgmt.power_on_VNFs(config, VNFs)
-            print ("Powered on VNFs")
+            #vnf_mgmt.power_on_VNFs(config, VNFs)
+            #print ("Powered on VNFs")
 
             config = vnf_mgmt.update_VNF_configurations(config)
             print ("Updated VNF configurations")
@@ -181,11 +181,15 @@ def send_workloads(g_config, config, VNFs, flag):
 
             measure_latency(g_config, VNFs, True)
             print ("Measured end-to-end latencies with workloads")
-
+            
             # ============ #
 
-            #monitor.monitor_VNFs(g_config, config, VNFs, extras, monitor_time)
-            monitor.monitor_VNF(config, "tcpdump")
+            monitor.monitor_VNFs(g_config, config, VNFs, extras, monitor_time)
+            #monitor.monitor_VNF(config, "tcpdump")
+            #monitor.monitor_host()
+            #monitor.monitor_host_VNF(config, "tcpdump")
+            #monitor.monitor_host_extra(config, extras[0])
+            #quit()
             # ============ #
 
             while True: # waiting until all monitoring threads are terminated
@@ -194,7 +198,7 @@ def send_workloads(g_config, config, VNFs, flag):
                 else:
                     time.sleep(1.0)
             print ("Stopped monitoring VNFs")
-
+            vnf_mgmt.initialize_Open_vSwitch(0)
             vnf_mgmt.get_application_stats_of_VNFs(config, VNFs)
             print ("Got the statistics of passive VNFs")
 
@@ -226,9 +230,9 @@ def send_workloads(g_config, config, VNFs, flag):
 
             vnf_mgmt.stop_applications_in_VNFs(config, VNFs)
             print ("Terminated applications in VNFs")
-
-            vnf_mgmt.shut_down_VNFs(VNFs)
-            print ("Shut down VNFs")
+            
+            #vnf_mgmt.shut_down_VNFs(VNFs)
+            #print ("Shut down VNFs")
 
             # ============ #
 

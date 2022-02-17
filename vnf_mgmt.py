@@ -76,7 +76,7 @@ def update_VNF_configurations(config):
     #config["suricata-ips"]["inbound"] =
     #config["suricata-ips"]["outbound"] =
 
-    config["tcpdump"]["inbound"] = "1"
+    config["tcpdump"]["inbound"] = "16"
 
     #config["NAT"]["inbound"] =
     #config["NAT"]["outbound"] =
@@ -92,7 +92,7 @@ def update_VNF_configurations(config):
         for entry in vnf['cmdline']:
             name = vnf['cmdline'][vnf['cmdline'].index('-name') + 1]
             if name not in config:
-                print("%s is not in the VNF configurations" % (name))
+                #print("%s is not in the VNF configurations" % (name))
                 continue
 
             config[name]["pid"] = vnf['pid']
@@ -337,7 +337,7 @@ def get_application_stats_of_VNFs(config, VNFs):
     return
 
 def make_chain_of_VNFs(config, VNFs):
-    os.system("sudo ovs-ofctl del-flows vmbr0")
+    os.system("sudo ovs-ofctl del-flows vmbr1")
     ''' 
     os.system("sudo ovs-ofctl add-flow vmbr0 in_port=11,actions=output:LOCAL")
     os.system("sudo ovs-ofctl add-flow vmbr0 in_port=LOCAL,actions=output:11")
@@ -351,7 +351,7 @@ def make_chain_of_VNFs(config, VNFs):
     vnf_cnt = 0
     out_port = ""
 
-    rule = "sudo ovs-ofctl add-flow vmbr0 in_port=5,actions="
+    rule = "sudo ovs-ofctl add-flow vmbr1 in_port=8,actions="
 
     for vnf in VNFs:
         output = config[vnf]["inbound"]
@@ -374,7 +374,7 @@ def make_chain_of_VNFs(config, VNFs):
             print("RULE = ", rule)
             rules.append(rule)
 
-            rule = "sudo ovs-ofctl add-flow vmbr0 in_port=" + out_port + ",actions="
+            rule = "sudo ovs-ofctl add-flow vmbr1 in_port=" + out_port + ",actions="
         else: # passive
             if vnf_cnt == 0:
                 rule = rule + "output:" + output
@@ -384,15 +384,15 @@ def make_chain_of_VNFs(config, VNFs):
             vnf_cnt = vnf_cnt + 1
 
     if vnf_cnt == 0:
-        rule = rule + "output:7"
+        rule = rule + "output:10"
     else:
-        rule = rule + ",output:7"
+        rule = rule + ",output:10"
 
     rule = rule + ",output:LOCAL"
     print("RULE out = ", rule)
     rules.append(rule)
 
-    rule = "sudo ovs-ofctl add-flow vmbr0 in_port=7,actions="    
+    rule = "sudo ovs-ofctl add-flow vmbr1 in_port=10,actions="    
     rev = []
 
     for vnf in VNFs:
@@ -422,7 +422,7 @@ def make_chain_of_VNFs(config, VNFs):
             rule = rule + ",output:LOCAL"
             rules.append(rule)
 
-            rule = "sudo ovs-ofctl add-flow vmbr0 in_port=" + out_port + ",actions="
+            rule = "sudo ovs-ofctl add-flow vmbr1 in_port=" + out_port + ",actions="
         else: # passive
             if vnf_cnt == 0:
                 rule = rule + "output:" + output
@@ -432,18 +432,18 @@ def make_chain_of_VNFs(config, VNFs):
             vnf_cnt = vnf_cnt + 1
 
     if vnf_cnt == 0:
-        rule = rule + "output:5"
+        rule = rule + "output:8"
     else:
-        rule = rule + ",output:5"
+        rule = rule + ",output:8"
     rule = rule + ",output:LOCAL"
     print("RULE last = ", rule)
     rules.append(rule)
-    rules.append("sudo ovs-ofctl add-flow vmbr0 in_port=LOCAL,actions=output:7,output:5")
+    rules.append("sudo ovs-ofctl add-flow vmbr1 in_port=LOCAL,actions=output:10,output:8,output:16")
     return rules
 
 def initialize_Open_vSwitch(analysis):
-    os.system("sudo ovs-ofctl del-flows vmbr0")
-    os.system("sudo ovs-ofctl add-flow vmbr0 action=normal")
+    os.system("sudo ovs-ofctl del-flows vmbr1")
+    os.system("sudo ovs-ofctl add-flow vmbr1 action=normal")
     return
 
 def apply_chain_of_VNFs(rules):
