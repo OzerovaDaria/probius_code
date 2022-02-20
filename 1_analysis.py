@@ -114,6 +114,7 @@ print ("Loaded global configurations")
 config = vnf_mgmt.load_VNF_configurations("config/vnf.conf")
 print ("Loaded VNF configurations")
 print(config)
+quit()
 
 # get the list of VNFs
 VNFs = vnf_mgmt.get_list_of_VNFs(config)

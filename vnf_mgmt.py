@@ -38,8 +38,14 @@ def load_VNF_configurations(conf_file):
             config[name]["net1"] = "" # inbound virtual interface
             config[name]["net2"] = "" # outbound virtual interface
 
-            config[name]["inbound"] = "" # inbound physical interface
-            config[name]["outbound"] = "" # outbound physical interface
+            config[name]["inbound"] =  str(data[name]["inbound"]) # inbound physical interface
+            config[name]["inbound_mac"] =  str(data[name]["inbound_mac"]) # inbound mac address
+            config[name]["inbound_port"] = "" # inbound port on ovs_switch
+            
+            if "outbound" in data[name]:
+                config[name]["outbound"] = str(data[name]["outbound"]) # outbound physical interface
+                config[name]["outbound_mac"] =  str(data[name]["outbound_mac"]) # otbound mac address
+                config[name]["outbound_port"] = "" # outbound port on ovs_switch
 
             config[name]["cpu"] = str(data[name]["cpu"]) # given number of CPUs
             config[name]["mem"] = str(data[name]["mem"]) # given mem size
@@ -67,6 +73,7 @@ def load_VNF_configurations(conf_file):
     return config
 
 def update_VNF_configurations(config):
+    '''
     config["firewall"]["inbound"] = "2"
     config["firewall"]["outbound"] = "3"
     config["netsniff-ng"]["inbound"] = "4"
@@ -77,10 +84,10 @@ def update_VNF_configurations(config):
     #config["suricata-ips"]["outbound"] =
 
     config["tcpdump"]["inbound"] = "16"
-
+    config["tcpdump"]["outbound"] = ""
     #config["NAT"]["inbound"] =
     #config["NAT"]["outbound"] =
-
+    '''
     for process in psutil.process_iter():
         try:
             vnf = process.as_dict(attrs=['name', 'pid', 'cmdline'])
@@ -96,6 +103,21 @@ def update_VNF_configurations(config):
                 continue
 
             config[name]["pid"] = vnf['pid']
+            
+            mac = config[name]["inbound_mac"] # added to config file for each vnf
+            cmd = "ovs-appctl fdb/show vmbr1 | grep " + mac + " | awk '{print $1}'"
+            res = subprocess.check_output(cmd, shell=True)
+            port = res.rstrip()
+            config[name]["inbound_port"] = port
+
+            if "outbound_mac" in config[name]:
+                mac = config[name]["outbound_mac"] # added to config file for each vnf
+                cmd = "ovs-appctl fdb/show vmbr1 | grep " + mac + " | awk '{print $1}'"
+                res = subprocess.check_output(cmd, shell=True)
+                port = res.rstrip()
+                config[name]["outbound_port"] = port
+
+
     return config
 
 def get_extras():

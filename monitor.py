@@ -29,16 +29,16 @@ proxmoxx.connect("172.30.12.2", "w4")
 def get_info_of_VNF(resp1):
     #state, maxmem, mem, num_cpus, cpu_time = dom.info()
     num_cpus = resp1["cpus"]
-    mem = resp1["mem"]
+    mem = resp1["ballooninfo"]["total_mem"]
     mem /= 1024. # KB -> MB
     #cpu_time /= 1000000000. # ns -> sec
 
     return num_cpus, mem
 
-'''
+
 def get_cpu_stats_of_VNF(dom):
     stats = {}
-
+    '''
     cpu_stats = dom.getCPUStats(True)
 
     cpu_time = cpu_stats[0]["cpu_time"] / 1000000000. # ns -> sec
@@ -50,14 +50,14 @@ def get_cpu_stats_of_VNF(dom):
     for cpu in vcpu_stats:
         vcpu_time += cpu['vcpu_time']
     vcpu_time /= 1000000000. # ns -> sec
-
-    stats["cpu_time"] = cpu_time
-    stats["vcpu_time"] = vcpu_time
-    stats["user_time"] = user_time
-    stats["system_time"] = system_time
+    '''
+    stats["cpu_time"] = 0 #cpu_time
+    stats["vcpu_time"] = 0 #vcpu_time
+    stats["user_time"] = 0 #user_time
+    stats["system_time"] = 0 #system_time
 
     return stats
-'''
+
 def get_mem_stats_of_VNF(resp1):
     #stats = dom.memoryStats()
     stats = {}
@@ -65,7 +65,7 @@ def get_mem_stats_of_VNF(resp1):
     stats["swap_in"] = resp1["ballooninfo"]["mem_swapped_in"]
     stats["actual"] /= 1024. # KB -> MB
     stats["swap_in"] /= 1024. # KB -> MB
-    #stats["rss"] /= 1024. # KB -> MB
+    stats["rss"] = 0. # KB -> MB
 
     return stats
 
@@ -76,31 +76,32 @@ def get_disk_stats_of_VNF(resp1):
     stats["write_count"] = resp1["blockstat"]["scsi0"]["wr_operations"] * 1.0
     stats["write_bytes"] = resp1["blockstat"]["scsi0"]["wr_bytes"] * 1.0
 
-    #stats["error"] = err * 1.0
+    stats["error"] = (resp1["blockstat"]["scsi0"]["failed_wr_operations"] + resp1["blockstat"]["scsi0"]["failed_rd_operations"]) * 1.0
     
     return stats
-'''
+
 def get_net_stats_of_VNF(dom):
     stats = {}
-
+    '''
     tree = ElementTree.fromstring(dom.XMLDesc())
     ifaces = tree.findall('devices/interface/target')
     for dev in ifaces:
         iface = dev.get('dev')
 
         intf = str(iface)
+    '''
+    intf = "ens18"
+    stats[intf] = {}
 
-        stats[intf] = {}
+    #istats = dom.interfaceStats(iface)
 
-        istats = dom.interfaceStats(iface)
-
-        stats[intf]["packets_recv"] = istats[1] * 1.0
-        stats[intf]["bytes_recv"] = istats[0] * 1.0
-        stats[intf]["packets_sent"] = istats[5] * 1.0
-        stats[intf]["bytes_sent"] = istats[4] * 1.0
+    stats[intf]["packets_recv"] = resp1["statistics"]["rx-packets"] * 1.0
+    stats[intf]["bytes_recv"] = resp1["statistics"]["rx-bytes"] * 1.0
+    stats[intf]["packets_sent"] = resp1["statistics"]["tx-packets"] * 1.0
+    stats[intf]["bytes_sent"] = resp1["statistics"]["tx-bytes"] * 1.0
 
     return stats
-'''
+
 # libvirt
 def monitor_VNF(config, vnf):
     vnf_stats = {}
@@ -140,28 +141,28 @@ def monitor_VNF(config, vnf):
         first = True
 
     tm = time.time()
-    '''
-        cpu_stats = get_cpu_stats_of_VNF(dom)
+    
+    cpu_stats = get_cpu_stats_of_VNF(resp1)
 
-        if first == False:
-            vnf_stats["cpu_time"] = str((cpu_stats["cpu_time"] - guest_vnf_info[vnf]["cpu_time"]) \
-                                         / (tm - guest_vnf_info[vnf]["time"]))
-            vnf_stats["vcpu_time"] = str((cpu_stats["vcpu_time"] - guest_vnf_info[vnf]["vcpu_time"]) \
-                                         / (tm - guest_vnf_info[vnf]["time"]))
-            vnf_stats["user_time"] = str((cpu_stats["user_time"] - guest_vnf_info[vnf]["user_time"]) \
-                                         / (tm - guest_vnf_info[vnf]["time"]))
-            vnf_stats["system_time"] = str((cpu_stats["system_time"] - guest_vnf_info[vnf]["system_time"]) \
-                                         / (tm - guest_vnf_info[vnf]["time"]))
+    if first == False:
+        vnf_stats["cpu_time"] = str((cpu_stats["cpu_time"] - guest_vnf_info[vnf]["cpu_time"]) \
+                                     / (tm - guest_vnf_info[vnf]["time"]))
+        vnf_stats["vcpu_time"] = str((cpu_stats["vcpu_time"] - guest_vnf_info[vnf]["vcpu_time"]) \
+                                     / (tm - guest_vnf_info[vnf]["time"]))
+        vnf_stats["user_time"] = str((cpu_stats["user_time"] - guest_vnf_info[vnf]["user_time"]) \
+                                     / (tm - guest_vnf_info[vnf]["time"]))
+        vnf_stats["system_time"] = str((cpu_stats["system_time"] - guest_vnf_info[vnf]["system_time"]) \
+                                     / (tm - guest_vnf_info[vnf]["time"]))
 
-        guest_vnf_info[vnf]["cpu_time"] = cpu_stats["cpu_time"]
-        guest_vnf_info[vnf]["vcpu_time"] = cpu_stats["vcpu_time"]
-        guest_vnf_info[vnf]["user_time"] = cpu_stats["user_time"]
-        guest_vnf_info[vnf]["system_time"] = cpu_stats["system_time"]
-    '''
+    guest_vnf_info[vnf]["cpu_time"] = cpu_stats["cpu_time"]
+    guest_vnf_info[vnf]["vcpu_time"] = cpu_stats["vcpu_time"]
+    guest_vnf_info[vnf]["user_time"] = cpu_stats["user_time"]
+    guest_vnf_info[vnf]["system_time"] = cpu_stats["system_time"]
+    
     mem_stats = get_mem_stats_of_VNF(resp1)
 
     vnf_stats["total_mem"] = str(mem)
-    #vnf_stats["rss_mem"] = str(mem_stats["rss"])
+    vnf_stats["rss_mem"] = 0 #str(mem_stats["rss"])
 
     disk_stats = get_disk_stats_of_VNF(resp1)
     print("disk_stats[read_count] = ", disk_stats["read_count"])
@@ -180,47 +181,47 @@ def monitor_VNF(config, vnf):
     guest_vnf_info[vnf]["read_bytes"] = disk_stats["read_bytes"]
     guest_vnf_info[vnf]["write_count"] = disk_stats["write_count"]
     guest_vnf_info[vnf]["write_bytes"] = disk_stats["write_bytes"]
-    '''
-        net_stats = get_net_stats_of_VNF(dom)
+    
+    net_stats = get_net_stats_of_VNF(resp1)
 
-        for intf in net_stats:
-            if intf == config[vnf]["inbound"]:
-                if first == False:
-                    vnf_stats["packets_recv"] = str((net_stats[intf]["packets_recv"] - guest_vnf_info[vnf]["packets_recv"]) \
-                                                     / (tm - guest_vnf_info[vnf]["time"]))
-                    vnf_stats["bytes_recv"] = str((net_stats[intf]["bytes_recv"] - guest_vnf_info[vnf]["bytes_recv"]) \
-                                                     / (tm - guest_vnf_info[vnf]["time"]))
+    for intf in net_stats:
+        if intf == "ens18" #config[vnf]["inbound"]: #?????????????????
+            if first == False:
+                vnf_stats["packets_recv"] = str((net_stats[intf]["packets_recv"] - guest_vnf_info[vnf]["packets_recv"]) \
+                                                 / (tm - guest_vnf_info[vnf]["time"]))
+                vnf_stats["bytes_recv"] = str((net_stats[intf]["bytes_recv"] - guest_vnf_info[vnf]["bytes_recv"]) \
+                                                 / (tm - guest_vnf_info[vnf]["time"]))
 
-                guest_vnf_info[vnf]["packets_recv"] = net_stats[intf]["packets_recv"]
-                guest_vnf_info[vnf]["bytes_recv"] = net_stats[intf]["bytes_recv"]
+            guest_vnf_info[vnf]["packets_recv"] = net_stats[intf]["packets_recv"]
+            guest_vnf_info[vnf]["bytes_recv"] = net_stats[intf]["bytes_recv"]
 
-                if first == False:
-                    if config[vnf]["outbound"] == "":
-                        vnf_stats["packets_sent"] = str((net_stats[intf]["packets_sent"] - guest_vnf_info[vnf]["packets_sent"]) \
-                                                         / (tm - guest_vnf_info[vnf]["time"]))
-                        vnf_stats["bytes_sent"] = str((net_stats[intf]["bytes_sent"] - guest_vnf_info[vnf]["bytes_sent"]) \
-                                                         / (tm - guest_vnf_info[vnf]["time"]))
-
+            if first == False:
                 if config[vnf]["outbound"] == "":
-                    guest_vnf_info[vnf]["packets_sent"] = net_stats[intf]["packets_sent"]
-                    guest_vnf_info[vnf]["bytes_sent"] = net_stats[intf]["bytes_sent"]
-            elif intf == config[vnf]["outbound"]:
-                if first == False:
                     vnf_stats["packets_sent"] = str((net_stats[intf]["packets_sent"] - guest_vnf_info[vnf]["packets_sent"]) \
                                                      / (tm - guest_vnf_info[vnf]["time"]))
                     vnf_stats["bytes_sent"] = str((net_stats[intf]["bytes_sent"] - guest_vnf_info[vnf]["bytes_sent"]) \
                                                      / (tm - guest_vnf_info[vnf]["time"]))
 
+            if config[vnf]["outbound"] == "": #?????????????????????
                 guest_vnf_info[vnf]["packets_sent"] = net_stats[intf]["packets_sent"]
                 guest_vnf_info[vnf]["bytes_sent"] = net_stats[intf]["bytes_sent"]
+        elif intf == config[vnf]["outbound"]:
+            if first == False:
+                vnf_stats["packets_sent"] = str((net_stats[intf]["packets_sent"] - guest_vnf_info[vnf]["packets_sent"]) \
+                                                 / (tm - guest_vnf_info[vnf]["time"]))
+                vnf_stats["bytes_sent"] = str((net_stats[intf]["bytes_sent"] - guest_vnf_info[vnf]["bytes_sent"]) \
+                                                 / (tm - guest_vnf_info[vnf]["time"]))
 
-        conn.close()
+            guest_vnf_info[vnf]["packets_sent"] = net_stats[intf]["packets_sent"]
+            guest_vnf_info[vnf]["bytes_sent"] = net_stats[intf]["bytes_sent"]
 
-        if first == False:
-            database.guest_vnf_info(vnf, timestamp, vnf_stats)
+    #conn.close()
 
-        guest_vnf_info[vnf]["time"] = tm
-    '''
+    if first == False:
+        database.guest_vnf_info(vnf, timestamp, vnf_stats)
+
+    guest_vnf_info[vnf]["time"] = tm
+    
     return
 
 # inserted
