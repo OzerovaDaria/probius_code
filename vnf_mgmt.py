@@ -8,8 +8,8 @@ from datetime import datetime
 # Probius libraries
 import database
 import kvm
-proxmoxx = kvm.KVM()
-proxmoxx.connect("172.30.12.2", "w4")
+#proxmoxx = kvm.KVM()
+#proxmoxx.connect("172.30.12.2", "w4")
 '''
 vnf_dict = {}
 vnf_dict["firewall"] = 200
@@ -73,7 +73,7 @@ def load_VNF_configurations(conf_file):
     return config
 
 def update_VNF_configurations(config):
-    '''
+    
     config["firewall"]["inbound"] = "2"
     config["firewall"]["outbound"] = "3"
     config["netsniff-ng"]["inbound"] = "4"
@@ -83,7 +83,7 @@ def update_VNF_configurations(config):
     #config["suricata-ips"]["inbound"] =
     #config["suricata-ips"]["outbound"] =
 
-    config["tcpdump"]["inbound"] = "16"
+    config["tcpdump"]["inbound"] = "9"
     config["tcpdump"]["outbound"] = ""
     #config["NAT"]["inbound"] =
     #config["NAT"]["outbound"] =
@@ -105,19 +105,19 @@ def update_VNF_configurations(config):
             config[name]["pid"] = vnf['pid']
             
             mac = config[name]["inbound_mac"] # added to config file for each vnf
-            cmd = "ovs-appctl fdb/show vmbr1 | grep " + mac + " | awk '{print $1}'"
+            cmd = "ovs-appctl fdb/show vmbr0 | grep " + mac + " | awk '{print $1}'"
             res = subprocess.check_output(cmd, shell=True)
             port = res.rstrip()
             config[name]["inbound_port"] = port
 
             if "outbound_mac" in config[name]:
                 mac = config[name]["outbound_mac"] # added to config file for each vnf
-                cmd = "ovs-appctl fdb/show vmbr1 | grep " + mac + " | awk '{print $1}'"
+                cmd = "ovs-appctl fdb/show vmbr0 | grep " + mac + " | awk '{print $1}'"
                 res = subprocess.check_output(cmd, shell=True)
                 port = res.rstrip()
                 config[name]["outbound_port"] = port
 
-
+    '''
     return config
 
 def get_extras():
@@ -373,7 +373,7 @@ def make_chain_of_VNFs(config, VNFs):
     vnf_cnt = 0
     out_port = ""
 
-    rule = "sudo ovs-ofctl add-flow vmbr1 in_port=8,actions="
+    rule = "sudo ovs-ofctl add-flow vmbr0 in_port=10,actions="
 
     for vnf in VNFs:
         output = config[vnf]["inbound"]
@@ -396,7 +396,7 @@ def make_chain_of_VNFs(config, VNFs):
             print("RULE = ", rule)
             rules.append(rule)
 
-            rule = "sudo ovs-ofctl add-flow vmbr1 in_port=" + out_port + ",actions="
+            rule = "sudo ovs-ofctl add-flow vmbr0 in_port=" + out_port + ",actions="
         else: # passive
             if vnf_cnt == 0:
                 rule = rule + "output:" + output
@@ -406,15 +406,15 @@ def make_chain_of_VNFs(config, VNFs):
             vnf_cnt = vnf_cnt + 1
 
     if vnf_cnt == 0:
-        rule = rule + "output:10"
+        rule = rule + "output:12"
     else:
-        rule = rule + ",output:10"
+        rule = rule + ",output:12"
 
     rule = rule + ",output:LOCAL"
     print("RULE out = ", rule)
     rules.append(rule)
 
-    rule = "sudo ovs-ofctl add-flow vmbr1 in_port=10,actions="    
+    rule = "sudo ovs-ofctl add-flow vmbr0 in_port=12,actions="    
     rev = []
 
     for vnf in VNFs:
@@ -444,7 +444,7 @@ def make_chain_of_VNFs(config, VNFs):
             rule = rule + ",output:LOCAL"
             rules.append(rule)
 
-            rule = "sudo ovs-ofctl add-flow vmbr1 in_port=" + out_port + ",actions="
+            rule = "sudo ovs-ofctl add-flow vmbr0 in_port=" + out_port + ",actions="
         else: # passive
             if vnf_cnt == 0:
                 rule = rule + "output:" + output
@@ -454,18 +454,18 @@ def make_chain_of_VNFs(config, VNFs):
             vnf_cnt = vnf_cnt + 1
 
     if vnf_cnt == 0:
-        rule = rule + "output:8"
+        rule = rule + "output:10"
     else:
-        rule = rule + ",output:8"
+        rule = rule + ",output:10"
     rule = rule + ",output:LOCAL"
     print("RULE last = ", rule)
     rules.append(rule)
-    rules.append("sudo ovs-ofctl add-flow vmbr1 in_port=LOCAL,actions=output:10,output:8,output:16")
+    rules.append("sudo ovs-ofctl add-flow vmbr0 in_port=LOCAL,actions=output:12,output:10,output:9")
     return rules
 
 def initialize_Open_vSwitch(analysis):
-    os.system("sudo ovs-ofctl del-flows vmbr1")
-    os.system("sudo ovs-ofctl add-flow vmbr1 action=normal")
+    os.system("sudo ovs-ofctl del-flows vmbr0")
+    os.system("sudo ovs-ofctl add-flow vmbr0 action=normal")
     return
 
 def apply_chain_of_VNFs(rules):

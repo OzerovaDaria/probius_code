@@ -11,7 +11,7 @@ class KVM():
 
     def connect(self, hostname, nodename):
         self.proxmox = ProxmoxAPI(hostname, user='dzrlv@pve',
-                              password='1йц2№УК;',
+                              password='qwerty',
                               verify_ssl=False)
         for node in self.proxmox.nodes.get():
     	    for vm in self.proxmox.nodes(node['node']).qemu.get():

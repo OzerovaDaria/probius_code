@@ -22,8 +22,8 @@ host_ext_info = {}
 host_info = {}
 host_nic = {}
 
-proxmoxx = kvm.KVM()
-proxmoxx.connect("172.30.12.2", "w4")
+#proxmoxx = kvm.KVM()
+#proxmoxx.connect("172.30.12.2", "w4")
 
 
 def get_info_of_VNF(resp1):
@@ -185,7 +185,7 @@ def monitor_VNF(config, vnf):
     net_stats = get_net_stats_of_VNF(resp1)
 
     for intf in net_stats:
-        if intf == "ens18" #config[vnf]["inbound"]: #?????????????????
+        if intf == "ens18":
             if first == False:
                 vnf_stats["packets_recv"] = str((net_stats[intf]["packets_recv"] - guest_vnf_info[vnf]["packets_recv"]) \
                                                  / (tm - guest_vnf_info[vnf]["time"]))
