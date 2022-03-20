@@ -50,7 +50,8 @@ def analyze_trace(VNFs, protocol, bandwidth):
     for raw_trace in raw_traces:
         #print("raw_trace", raw_trace)
         trace = raw_trace.split()
-
+        #print("TRACE = ", trace)
+        #print("TRACE 0 = ", trace[0])
         if trace[0] == "version":
             continue
         elif trace[0] == "CPU":
@@ -64,7 +65,7 @@ def analyze_trace(VNFs, protocol, bandwidth):
                     traces[cpu] = []
             continue
         else:
-            if "qemu-system-x86" not in trace[0] and "qemu-kvm" not in trace[0]:
+            if "qemu-system-x86" not in trace[0] and "kvm-471322" not in trace[0]:
                 continue
 
             cpu = int(trace[1][1:4])
@@ -74,6 +75,7 @@ def analyze_trace(VNFs, protocol, bandwidth):
     global_pairs_cnt = {}
     global_pairs_time = {}
     
+    #print("TRACES = ",traces)
     #print("start cycle")
     for cpu in traces:
         #print("cpu", cpu)
@@ -102,6 +104,7 @@ def analyze_trace(VNFs, protocol, bandwidth):
             cpu = trace[1][1:4]
             time = float(trace[2][3:-1])
             event = trace[3][0:-1]
+            #print("event = ", event)
 
             data = "N/A"
             if event == "kvm_ple_window":
@@ -123,7 +126,7 @@ def analyze_trace(VNFs, protocol, bandwidth):
 
             if pre_event != "":
                 pair = "%s %s %s %s %s %s %s %s" % (pre_event, pre_pid, pre_tid, pre_data, event, pid, tid, data)
-
+                #print("PAIRS= ", pair)
                 if pair not in pairs:
                     pairs.append(pair)
                     pairs_cnt[pair] = 1
@@ -155,12 +158,12 @@ def analyze_trace(VNFs, protocol, bandwidth):
             pre_data = data
 
         #print("trace_info_cpu")
-        
+        #print(pairs)
         for pair in pairs:
             
             #print("pair")
-            print("timestamp", timestamp)
-            print("cpu", cpu)
+            #print("timestamp", timestamp)
+            #print("cpu", cpu)
             database.trace_info_cpu(timestamp, cpu, pair, pairs_cnt[pair], pairs_time[pair])
 
     f.close()
@@ -169,7 +172,7 @@ def analyze_trace(VNFs, protocol, bandwidth):
     #print("trace_info_pid")
     for pid in global_pairs:
         for pair in global_pairs[pid]:
-            #print(pair)
+            print(pair)
             database.trace_info_pid(timestamp, pid, pair, global_pairs_cnt[pid][pair], global_pairs_time[pid][pair])
 
     os.system("rm " + trace_log)

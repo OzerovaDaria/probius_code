@@ -233,8 +233,8 @@ def monitor_host_VNF(config, vnf):
     #print "host-side " + vnf + " monitor starts: " + str(timestamp)
 
     vnf_stats["pid"] = str(config[vnf]["pid"])
-
-    p = psutil.Process(config[vnf]["pid"])
+    print("PID = ",config[vnf]["pid"])
+    p = psutil.Process(int(config[vnf]["pid"]))
 
     # cpu_num
     vnf_stats["cpu_num"] = str(len(p.cpu_affinity()))

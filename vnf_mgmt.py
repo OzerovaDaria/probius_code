@@ -77,9 +77,11 @@ def update_VNF_configurations(config):
     config["firewall"]["inbound"] = "1"
     config["firewall"]["outbound"] = "1"
     config["netsniff-ng"]["inbound"] = "4"
+    config["netsniff-ng"]["outbound"] = ""
     config["snort-ids"]["inbound"] = "13"
+    config["snort-ids"]["outbound"] = ""
     config["suricata-ids"]["inbound"] = "7"
-
+    config["suricata-ids"]["outbound"] = ""
     #config["suricata-ips"]["inbound"] =
     #config["suricata-ips"]["outbound"] =
 
@@ -87,7 +89,7 @@ def update_VNF_configurations(config):
     config["tcpdump"]["outbound"] = ""
     #config["NAT"]["inbound"] =
     #config["NAT"]["outbound"] =
-    '''
+    
     for process in psutil.process_iter():
         try:
             vnf = process.as_dict(attrs=['name', 'pid', 'cmdline'])
@@ -103,7 +105,7 @@ def update_VNF_configurations(config):
                 continue
 
             config[name]["pid"] = vnf['pid']
-            
+    '''       
             mac = config[name]["inbound_mac"] # added to config file for each vnf
             cmd = "ovs-appctl fdb/show vmbr0 | grep " + mac + " | awk '{print $1}'"
             res = subprocess.check_output(cmd, shell=True)
