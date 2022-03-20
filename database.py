@@ -292,6 +292,7 @@ def trace_info_pid(timestamp, pid, pair, count, time):
              values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%.9f');" \
              % (timestamp, pid, pre_event, pre_pid, pre_tid, pre_data, curr_event, curr_pid, curr_tid, curr_data, count, time)
 
+    print(query)
     run_query(query)
 
     return
