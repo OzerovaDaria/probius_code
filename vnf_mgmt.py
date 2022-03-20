@@ -74,10 +74,10 @@ def load_VNF_configurations(conf_file):
 
 def update_VNF_configurations(config):
     
-    config["firewall"]["inbound"] = "2"
-    config["firewall"]["outbound"] = "3"
+    config["firewall"]["inbound"] = "1"
+    config["firewall"]["outbound"] = "1"
     config["netsniff-ng"]["inbound"] = "4"
-    config["snort-ids"]["inbound"] = "6"
+    config["snort-ids"]["inbound"] = "13"
     config["suricata-ids"]["inbound"] = "7"
 
     #config["suricata-ips"]["inbound"] =

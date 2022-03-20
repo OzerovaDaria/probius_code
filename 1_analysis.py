@@ -65,15 +65,15 @@ def run_analysis(g_config, config, case):
                 #vnf_mgmt.set_mems_of_VNFs(mem, case)
                 print ("4")
 
-            print ("###########################\n")
-            print (len(case))
+            #print ("###########################\n")
+            #print (len(case))
             # print the info of the current testcase
 
             for idx in range(len(case)):
                 print (case[idx], cpu[idx], mem[idx])
             
             if common.debug == False:
-                print("Here!")
+                #print("Here!")
                 # send workload (run monitor and trace)
                 
                 workload.send_workloads(g_config, config, case, common.trace_state_transitions)

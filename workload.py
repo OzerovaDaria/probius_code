@@ -205,11 +205,15 @@ def send_workloads(g_config, config, VNFs, flag):
             # ============ #
 
             if flag == True:
+                print("#============#")
+                print("Трассировка")
+                print("#============#")
                 trace.run_trace(trace_time)
                 print ("Traced events")
 
                 trace.analyze_trace(VNFs, protocol, bandwidth)
                 print ("Analyzed the events")
+                quit()
 
             # ============ #
 

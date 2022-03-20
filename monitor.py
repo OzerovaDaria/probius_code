@@ -110,6 +110,7 @@ def monitor_VNF(config, vnf):
     #print("maxmem", resp1["maxmem"])
     b = json.dumps(resp1, indent=2)
     #print(b)
+    '''
     print("STATUS = ", resp1["status"])
     print("MEM = ", resp1["mem"])
     print("CPUS = ", resp1["cpus"])
@@ -120,7 +121,7 @@ def monitor_VNF(config, vnf):
     print("DISC_READ_BYTES = ", resp1["blockstat"]["scsi0"]["rd_bytes"])
     print("DISC_WRITE_BYTES = ", resp1["blockstat"]["scsi0"]["wr_bytes"])
     print("$$$$$$$$$$$$$$$$$$$$$$$$$$")
-    '''    
+        
     conn = libvirt.open("qemu:///system")
     if conn == None:
         print ("Error: failed to connect QEMU")
@@ -326,9 +327,9 @@ def monitor_host_VNF(config, vnf):
         database.host_VNF_info(vnf, timestamp, vnf_stats)
 
     host_vnf_info[vnf]["time"] = tm
-    print("vnf_stats", vnf_stats)
+    #print("vnf_stats", vnf_stats)
 
-    print("host_vnf_info", host_vnf_info)
+    #print("host_vnf_info", host_vnf_info)
 
     return
 
@@ -428,8 +429,8 @@ def monitor_host_extra(config, extra):
 
     host_ext_info[pid]["time"] = tm
 
-    print("ext_stats", ext_stats)
-    print("host_ext_info", host_ext_info)
+    #print("ext_stats", ext_stats)
+    #print("host_ext_info", host_ext_info)
     return
 
 # inserted
@@ -604,9 +605,9 @@ def monitor_host(profile):
                 database.host_net(timestamp, host_nets)
         '''
     host_info["time"] = tm
-    print("host_stats: ",host_stats)
+    #print("host_stats: ",host_stats)
 
-    print("host_info: ",host_info)
+    #print("host_info: ",host_info)
     return
 			
 		
