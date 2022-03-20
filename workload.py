@@ -213,7 +213,7 @@ def send_workloads(g_config, config, VNFs, flag):
 
                 trace.analyze_trace(VNFs, protocol, bandwidth)
                 print ("Analyzed the events")
-                quit()
+                #quit()
 
             # ============ #
 

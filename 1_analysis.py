@@ -75,7 +75,6 @@ def run_analysis(g_config, config, case):
             if common.debug == False:
                 #print("Here!")
                 # send workload (run monitor and trace)
-                
                 workload.send_workloads(g_config, config, case, common.trace_state_transitions)
                 print ("5")
 
@@ -107,13 +106,13 @@ print ("Initialized the Probius database")
 
 # load global configurations
 g_config = load_global_configurations("config/global.conf")
-print(g_config)
+#print(g_config)
 print ("Loaded global configurations")
 
 # load VNF configurations
 config = vnf_mgmt.load_VNF_configurations("config/vnf.conf")
 print ("Loaded VNF configurations")
-print(config)
+#print(config)
 #quit()
 
 # get the list of VNFs

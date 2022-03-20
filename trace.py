@@ -48,7 +48,7 @@ def analyze_trace(VNFs, protocol, bandwidth):
 
     traces = {}
     for raw_trace in raw_traces:
-        print("raw_trace", raw_trace)
+        #print("raw_trace", raw_trace)
         trace = raw_trace.split()
 
         if trace[0] == "version":
@@ -76,7 +76,7 @@ def analyze_trace(VNFs, protocol, bandwidth):
     
     #print("start cycle")
     for cpu in traces:
-        print("cpu", cpu)
+        #print("cpu", cpu)
         pre_pid = ""
         pre_tid = ""
         pre_time = 0.0
@@ -159,8 +159,8 @@ def analyze_trace(VNFs, protocol, bandwidth):
         for pair in pairs:
             
             #print("pair")
-            #print("timestamp", timestamp)
-            #print("cpu", cpu)
+            print("timestamp", timestamp)
+            print("cpu", cpu)
             database.trace_info_cpu(timestamp, cpu, pair, pairs_cnt[pair], pairs_time[pair])
 
     f.close()
