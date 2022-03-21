@@ -65,7 +65,7 @@ def analyze_trace(VNFs, protocol, bandwidth):
                     traces[cpu] = []
             continue
         else:
-            if "qemu-system-x86" not in trace[0] and "kvm-471322" not in trace[0]:
+            if "qemu-system-x86" not in trace[0] and not trace[0].startswith("kvm-"):
                 continue
 
             cpu = int(trace[1][1:4])
@@ -161,9 +161,9 @@ def analyze_trace(VNFs, protocol, bandwidth):
         #print(pairs)
         for pair in pairs:
             
-            #print("pair")
-            #print("timestamp", timestamp)
-            #print("cpu", cpu)
+            #print("pair = ", pair)
+            #print("timestamp = ", timestamp)
+            #print("cpu = ", cpu)
             database.trace_info_cpu(timestamp, cpu, pair, pairs_cnt[pair], pairs_time[pair])
 
     f.close()
@@ -172,7 +172,7 @@ def analyze_trace(VNFs, protocol, bandwidth):
     #print("trace_info_pid")
     for pid in global_pairs:
         for pair in global_pairs[pid]:
-            print(pair)
+            #print("pair = ", pair)
             database.trace_info_pid(timestamp, pid, pair, global_pairs_cnt[pid][pair], global_pairs_time[pid][pair])
 
     os.system("rm " + trace_log)
