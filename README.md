@@ -1,8 +1,5 @@
 ### Introduction
-- Probius: Automated Approach for VNF and Service Chain Analysis in Software-Defined NFV  
-
-### Notification
-- If you find any bugs or have some questions, please send an e-mail to us.  
+- Probius: Automated Approach for VNF and Service Chain Analysis in Software-Defined NFV   
 
 ### Configuration
 - The configuration of the Probius system: config/global.conf  
