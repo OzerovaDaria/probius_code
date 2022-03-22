@@ -462,7 +462,7 @@ def make_chain_of_VNFs(config, VNFs):
     rule = rule + ",output:LOCAL"
     print("RULE last = ", rule)
     rules.append(rule)
-    rules.append("sudo ovs-ofctl add-flow vmbr0 in_port=LOCAL,actions=output:12,output:10,output:9")
+    rules.append("sudo ovs-ofctl add-flow vmbr0 in_port=LOCAL,actions=output:12,output:10,output:6")
     return rules
 
 def initialize_Open_vSwitch(analysis):
