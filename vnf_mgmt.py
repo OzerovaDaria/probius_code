@@ -80,7 +80,7 @@ def update_VNF_configurations(config):
     config["netsniff-ng"]["outbound"] = ""
     config["snort-ids"]["inbound"] = "13"
     config["snort-ids"]["outbound"] = ""
-    config["suricata-ids"]["inbound"] = "7"
+    config["suricata-ids"]["inbound"] = "14"
     config["suricata-ids"]["outbound"] = ""
     #config["suricata-ips"]["inbound"] =
     #config["suricata-ips"]["outbound"] =
@@ -462,7 +462,7 @@ def make_chain_of_VNFs(config, VNFs):
     rule = rule + ",output:LOCAL"
     print("RULE last = ", rule)
     rules.append(rule)
-    rules.append("sudo ovs-ofctl add-flow vmbr0 in_port=LOCAL,actions=output:12,output:10,output:6")
+    rules.append("sudo ovs-ofctl add-flow vmbr0 in_port=LOCAL,actions=output:12,output:10,output:14")
     return rules
 
 def initialize_Open_vSwitch(analysis):
