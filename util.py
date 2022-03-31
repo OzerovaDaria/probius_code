@@ -35,11 +35,12 @@ def get_M(values):
 
     tmp.sort()
     length = len(tmp)
-    median = length / 2
+    median = int(length / 2)
 
     if length % 2 == 1:
         return tmp[median]
     else:
+        #return 0
         return ((tmp[median - 1] + tmp[median]) * 1.0) / 2
 
 def get_S(values):
@@ -114,7 +115,7 @@ def get_median(values, flag=False):
                     tmp.remove(t)
 
     length = len(tmp)
-    median = length / 2
+    median = int(length // 2)
 
     if length % 2 == 1:
         return tmp[median]
