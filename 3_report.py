@@ -9,7 +9,7 @@ import util
 from common import analysis_database
 
 if len(sys.argv) != 2:
-    print "%s [all | testcase]" % (sys.argv[0])
+    print ("%s [all | testcase]" % (sys.argv[0]))
     exit(0)
 
 conn = sqlite3.connect(analysis_database)
@@ -107,13 +107,13 @@ for case in testcases:
 
 conn.close()
 
-print "testcase | protocol | bandwidth | vnf | " + \
+print ("testcase | protocol | bandwidth | vnf | " + \
       "guest_cpu_time | guest_vcpu_time | guest_user_time | guest_system_time | " + \
       "host_cpu_percent | host_user_time | host_system_time | " + \
       "host_mem_percent | host_total_mem | host_rss_mem | " + \
       "guest_disk_read_count | guest_disk_read_bytes | guest_disk_write_count | guest_disk_write_bytes | " + \
       "recv_pps | recv_Mbps | sent_pps | sent_Mbps | " + \
-      "num_threads | voluntary_ctx_switch | involuntary_ctx_switch"
+      "num_threads | voluntary_ctx_switch | involuntary_ctx_switch")
 
 for case in results:
     for vnf in results[case]:
@@ -127,7 +127,7 @@ for case in results:
                 bandwidth = str(key)
                 stats = results[case][vnf][protocol][bandwidth]
 
-                print "%s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s" % \
+                print ("%s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s" % \
                       (case, protocol, bandwidth, vnf, \
                        stats["g_cpu_time"], stats["g_vcpu_time"], stats["g_user_time"], stats["g_system_time"], \
                        stats["h_cpu_percent"], stats["h_user_time"], stats["h_system_time"], \
@@ -135,4 +135,5 @@ for case in results:
                        stats["g_read_count"], stats["g_read_bytes"], stats["g_write_count"], stats["g_write_bytes"], \
                        float(stats["pps_recv"]), float(stats["bps_recv"]) / 1024. / 1024., \
                        float(stats["pps_sent"]), float(stats["bps_sent"]) / 1024. / 1024., \
-                       stats["num_threads"], stats["vol_ctx"], stats["invol_ctx"])
+                       stats["num_threads"], stats["vol_ctx"], stats["invol_ctx"]))
+

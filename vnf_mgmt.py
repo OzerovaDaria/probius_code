@@ -8,8 +8,8 @@ from datetime import datetime
 # Probius libraries
 import database
 import kvm
-#proxmoxx = kvm.KVM()
-#proxmoxx.connect("172.30.12.2", "w4")
+proxmoxx = kvm.KVM()
+proxmoxx.connect("172.30.12.2", "w4")
 '''
 vnf_dict = {}
 vnf_dict["firewall"] = 200
@@ -361,7 +361,7 @@ def get_application_stats_of_VNFs(config, VNFs):
     return
 
 def make_chain_of_VNFs(config, VNFs):
-    os.system("sudo ovs-ofctl del-flows vmbr1")
+    os.system("sudo ovs-ofctl del-flows vmbr0")
     ''' 
     os.system("sudo ovs-ofctl add-flow vmbr0 in_port=11,actions=output:LOCAL")
     os.system("sudo ovs-ofctl add-flow vmbr0 in_port=LOCAL,actions=output:11")
@@ -462,7 +462,7 @@ def make_chain_of_VNFs(config, VNFs):
     rule = rule + ",output:LOCAL"
     print("RULE last = ", rule)
     rules.append(rule)
-    rules.append("sudo ovs-ofctl add-flow vmbr0 in_port=LOCAL,actions=output:12,output:10,output:14")
+    rules.append("sudo ovs-ofctl add-flow vmbr0 in_port=LOCAL,actions=output:12,output:10,output:9")
     return rules
 
 def initialize_Open_vSwitch(analysis):

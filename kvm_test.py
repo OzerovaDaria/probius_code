@@ -15,8 +15,8 @@ class KVM():
         self.result = []
 
     def connect(self, hostname, nodename):
-        self.proxmox = ProxmoxAPI(hostname, user='dzrlv@pve',
-                              password='1йц2№УК;',
+        self.proxmox = ProxmoxAPI(hostname, user='dzrlv@pam',
+                              password='qwerty',
                               verify_ssl=False)
         for node in self.proxmox.nodes.get():
     	    for vm in self.proxmox.nodes(node['node']).qemu.get():
@@ -133,7 +133,7 @@ for node in proxmoxx.proxmox().nodes.get():
 #print(a)
 '''
 resp1 = proxmoxx.proxmox().nodes('w4').qemu(210).status.current.get()
-print("maxmem", resp1["maxmem"])
+#print("maxmem", resp1["maxmem"])
 b = json.dumps(resp1, indent=2)
 print(b)
 print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
@@ -142,7 +142,15 @@ print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 resp = proxmoxx.proxmox().nodes('w4').qemu(210).agent('network-get-interfaces').get()
 c = json.dumps(resp, indent=2)
+#print(type(resp["result"][1]["statistics"]))
 print(c)
+print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+#for i in range(100):
+#    print(c[i])
+#print(type(c))
 '''
 '''
 #resp2 = proxmoxx.proxmox().nodes('w4').qemu(210).()

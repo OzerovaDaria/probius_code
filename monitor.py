@@ -22,8 +22,8 @@ host_ext_info = {}
 host_info = {}
 host_nic = {}
 
-#proxmoxx = kvm.KVM()
-#proxmoxx.connect("172.30.12.2", "w4")
+proxmoxx = kvm.KVM()
+proxmoxx.connect("172.30.12.2", "w4")
 
 
 def get_info_of_VNF(resp1):
@@ -80,7 +80,7 @@ def get_disk_stats_of_VNF(resp1):
     
     return stats
 
-def get_net_stats_of_VNF(dom):
+def get_net_stats_of_VNF(resp):
     stats = {}
     '''
     tree = ElementTree.fromstring(dom.XMLDesc())
@@ -94,11 +94,11 @@ def get_net_stats_of_VNF(dom):
     stats[intf] = {}
 
     #istats = dom.interfaceStats(iface)
-
-    stats[intf]["packets_recv"] = resp1["statistics"]["rx-packets"] * 1.0
-    stats[intf]["bytes_recv"] = resp1["statistics"]["rx-bytes"] * 1.0
-    stats[intf]["packets_sent"] = resp1["statistics"]["tx-packets"] * 1.0
-    stats[intf]["bytes_sent"] = resp1["statistics"]["tx-bytes"] * 1.0
+    #resp = proxmoxx.proxmox().nodes('w4').qemu(vmid).agent('network-get-interfaces').get()
+    stats[intf]["packets_recv"] = resp["result"][1]["statistics"]["rx-packets"] * 1.0
+    stats[intf]["bytes_recv"] = resp["result"][1]["statistics"]["rx-bytes"] * 1.0
+    stats[intf]["packets_sent"] = resp["result"][1]["statistics"]["tx-packets"] * 1.0
+    stats[intf]["bytes_sent"] = resp["result"][1]["statistics"]["tx-bytes"] * 1.0
 
     return stats
 
@@ -106,6 +106,7 @@ def get_net_stats_of_VNF(dom):
 def monitor_VNF(config, vnf):
     vnf_stats = {}
     vmid = config[vnf]["vmid"]
+    resp = proxmoxx.proxmox().nodes('w4').qemu(vmid).agent('network-get-interfaces').get()
     resp1 = proxmoxx.proxmox().nodes('w4').qemu(vmid).status.current.get()
     #print("maxmem", resp1["maxmem"])
     b = json.dumps(resp1, indent=2)
@@ -132,8 +133,8 @@ def monitor_VNF(config, vnf):
     print (str(vnf) + " monitors start: " + str(timestamp))
 
     num_cpus, mem = get_info_of_VNF(resp1)
-    print("num_cpus, mem = ", num_cpus, mem)
-    print()
+    #print("num_cpus, mem = ", num_cpus, mem)
+    #print()
     vnf_stats["cpu_num"] = str(num_cpus)
 
     first = False
@@ -161,6 +162,7 @@ def monitor_VNF(config, vnf):
     guest_vnf_info[vnf]["system_time"] = cpu_stats["system_time"]
     
     mem_stats = get_mem_stats_of_VNF(resp1)
+    print("MEM STATS : ", mem_stats)
 
     vnf_stats["total_mem"] = str(mem)
     vnf_stats["rss_mem"] = 0 #str(mem_stats["rss"])
@@ -183,7 +185,8 @@ def monitor_VNF(config, vnf):
     guest_vnf_info[vnf]["write_count"] = disk_stats["write_count"]
     guest_vnf_info[vnf]["write_bytes"] = disk_stats["write_bytes"]
     
-    net_stats = get_net_stats_of_VNF(resp1)
+    net_stats = get_net_stats_of_VNF(resp)
+    print("NET STATS : ", net_stats)
 
     for intf in net_stats:
         if intf == "ens18":
@@ -220,7 +223,7 @@ def monitor_VNF(config, vnf):
 
     if first == False:
         database.guest_vnf_info(vnf, timestamp, vnf_stats)
-
+    print("GUEST_VNF_INFO READY")
     guest_vnf_info[vnf]["time"] = tm
     
     return
@@ -628,12 +631,12 @@ def create_monitor_threads_per_VNF(profile, config, VNFs, extras):
     for extra in extras:
         t = threading.Thread(target=monitor_host_extra, args=(config, extra,))
         threads.append(t)
-    '''
+    
     # guest-side VNF monitor
     for vnf in VNFs:
         t = threading.Thread(target=monitor_VNF, args=(config, vnf,))
         threads.append(t)
-    '''
+    
     # start threads
     for thread in threads:
         thread.start()

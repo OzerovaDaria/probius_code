@@ -10,7 +10,7 @@ class KVM():
         self.result = []
 
     def connect(self, hostname, nodename):
-        self.proxmox = ProxmoxAPI(hostname, user='dzrlv@pve',
+        self.proxmox = ProxmoxAPI(hostname, user='dzrlv@pam',
                               password='qwerty',
                               verify_ssl=False)
         for node in self.proxmox.nodes.get():
@@ -109,11 +109,11 @@ class KVM():
         else:
             return {'result': 'kvm', 'status': 'error',
                 'actions': result}
-"""
+'''
 proxmoxx = KVM()
 proxmoxx.connect("172.30.12.2", "w4")
 for i in range(200, 212):
     if i != 208 and i != 209:
         proxmoxx.stopvm(i)
+'''
 
-"""

@@ -299,37 +299,37 @@ for idx in range(len(vnfs)):
                 suspicious_cases[labels[idx]][extra_labels[idx]] = pow(2, 12)
 
 for case in sorted(suspicious_cases, key=suspicious_cases.get, reverse=True):
-    print case
+    print (case)
     for vnf in sorted(suspicious_cases[case], key=suspicious_cases[case].get, reverse=True):
-        print "  ", vnf, "->",
+        print ("  ", vnf, "->")
         if suspicious_cases[case][vnf] & pow(2, 0):
-            print "g_cpu_time ",
+            print ("g_cpu_time ")
         elif suspicious_cases[case][vnf] & pow(2, 1):
-            print "g_vcpu_time ",
+            print ("g_vcpu_time ")
         elif suspicious_cases[case][vnf] & pow(2, 2):
-            print "g_user_time ",
+            print ("g_user_time ")
         elif suspicious_cases[case][vnf] & pow(2, 3):
-            print "g_system_time ",
+            print ("g_system_time ")
         elif suspicious_cases[case][vnf] & pow(2, 4):
-            print "h_cpu_percent ",
+            print ("h_cpu_percent ")
         elif suspicious_cases[case][vnf] & pow(2, 5):
-            print "h_user_time ",
+            print ("h_user_time ")
         elif suspicious_cases[case][vnf] & pow(2, 6):
-            print "h_system_time ",
+            print ("h_system_time ")
         elif suspicious_cases[case][vnf] & pow(2, 7):
-            print "h_mem_percent ",
+            print ("h_mem_percent ")
         elif suspicious_cases[case][vnf] & pow(2, 8):
-            print "h_rss_mem ",
+            print ("h_rss_mem ")
         elif suspicious_cases[case][vnf] & pow(2, 9):
-            print "g_read_count ",
+            print ("g_read_count ")
         elif suspicious_cases[case][vnf] & pow(2, 10):
-            print "g_write_count ",
+            print ("g_write_count ")
         elif suspicious_cases[case][vnf] & pow(2, 11):
-            print "bps_recv ",
+            print ("bps_recv ")
         elif suspicious_cases[case][vnf] & pow(2, 12):
-            print "bps_sent ",
+            print ("bps_sent ")
         else:
-            print suspicious_cases[case][vnf],
-    print
+            print (suspicious_cases[case][vnf])
+    print ("\n")
 
 conn.close()
