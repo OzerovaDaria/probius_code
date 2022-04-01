@@ -22,7 +22,7 @@ msg['From'] = fromaddr
 msg['To'] = toaddr
 msg['Subject'] = "Fixed problem Probius"
  
-body = "Report:\n"
+body = "Problems were fixed in the following testcases:\n\n"
 
 if len(sys.argv) != 2:
     print ("%s [all | testcase]" % (sys.argv[0]))
@@ -158,10 +158,11 @@ for case in results:
                 #body += "*" + "\n"
                 body += "guest_disk_read_count: " + stats["g_read_count"]  + "\n" + "guest_disk_read_bytes: " + stats["g_read_bytes"] + "\n" + "guest_disk_write_count: " + stats["g_write_count"] + "\n" + "guest_disk_write_bytes: " + stats["g_write_bytes"] + "\n"
                 #body += "*" + "\n"
-                #body += "recv_pps: " + stats["pps_recv"] + "\n" + "recv_Mbps: " + float(stats["bps_recv"] + "\n" + "sent_pps: " + "1024" + "\n" + "sent_Mbps: " + "1024" + "\n" 
+                body += "recv_pps: " + str(float(stats["pps_recv"])) + "\n" + "recv_Mbps: " + str(float(stats["bps_recv"])/ 1024. / 1024.) + "\n"
+                body += "sent_pps: " + str(float(stats["pps_sent"])) + "\n" + "sent_Mbps: " + str(float(stats["bps_sent"]) / 1024. / 1024.) + "\n"
                 body += "num_threads: " + stats["num_threads"] + "\n" + "voluntary_ctx_switch: " +  stats["vol_ctx"] + "\n" + "involuntary_ctx_switch: " + stats["invol_ctx"] + "\n"
                 
-                body += "\n" + "***" + " next testcase " + "***" + "\n"
+                body += "\n" + "\n"
                 
                 '''
                 print ("%s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s" % \

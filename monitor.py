@@ -162,7 +162,7 @@ def monitor_VNF(config, vnf):
         guest_vnf_info[vnf]["system_time"] = cpu_stats["system_time"]
     
     mem_stats = get_mem_stats_of_VNF(resp1)
-    print("MEM STATS : ", mem_stats)
+    #print("MEM STATS : ", mem_stats)
 
     vnf_stats["total_mem"] = str(mem)
     vnf_stats["rss_mem"] = 0 #str(mem_stats["rss"])
@@ -188,20 +188,23 @@ def monitor_VNF(config, vnf):
         vnf_stats["read_bytes"] = disk_stats["read_bytes"]
         vnf_stats["write_count"] = disk_stats["write_count"]
         vnf_stats["write_bytes"] = disk_stats["write_bytes"]
+
+    print("GUEST VNF STATS DISC : ", vnf_stats["read_count"], vnf_stats["read_bytes"])
+    print("GUEST VNF STATS DISC : ", vnf_stats["write_count"], vnf_stats["write_bytes"])
     
     net_stats = get_net_stats_of_VNF(resp)
-    print("NET STATS : ", net_stats)
+    #print("NET STATS : ", net_stats)
 
     for intf in net_stats:
-        print("INTERFACE = ", intf)
+        #print("INTERFACE = ", intf)
         if intf == "ens18":
             if first == False:
                 vnf_stats["packets_recv"] = str((net_stats[intf]["packets_recv"] - guest_vnf_info[vnf]["packets_recv"])) # \
                                                  #/ (tm - guest_vnf_info[vnf]["time"]))
                 vnf_stats["bytes_recv"] = str((net_stats[intf]["bytes_recv"] - guest_vnf_info[vnf]["bytes_recv"])) # \
                                                  #/ (tm - guest_vnf_info[vnf]["time"]))
-                print("GUEST VNF STATS 1 : ", vnf_stats["packets_recv"])
-                print("GUEST VNF STATS 1 : ", vnf_stats["bytes_recv"])
+                #print("GUEST VNF STATS 1 : ", vnf_stats["packets_recv"])
+                #print("GUEST VNF STATS 1 : ", vnf_stats["bytes_recv"])
             else:
                 guest_vnf_info[vnf]["packets_recv"] = net_stats[intf]["packets_recv"]
                 guest_vnf_info[vnf]["bytes_recv"] = net_stats[intf]["bytes_recv"]
@@ -226,12 +229,14 @@ def monitor_VNF(config, vnf):
                                                  #/ (tm - guest_vnf_info[vnf]["time"]))
                 vnf_stats["bytes_sent"] = str((net_stats[intf]["bytes_sent"] - guest_vnf_info[vnf]["bytes_sent"])) # \
                                                  #/ (tm - guest_vnf_info[vnf]["time"]))
-
-            guest_vnf_info[vnf]["packets_sent"] = net_stats[intf]["packets_sent"]
-            guest_vnf_info[vnf]["bytes_sent"] = net_stats[intf]["bytes_sent"]
+            else:
+                guest_vnf_info[vnf]["packets_sent"] = net_stats[intf]["packets_sent"]
+                guest_vnf_info[vnf]["bytes_sent"] = net_stats[intf]["bytes_sent"]
+                vnf_stats["packets_sent"] = net_stats[intf]["packets_sent"]
+                vnf_stats["bytes_sent"] = net_stats[intf]["bytes_sent"]
 
     #conn.close()
-    print("VNF_STATS!!!! : ", vnf_stats)
+    print("VNF_STATS: ", vnf_stats)
 
     if first == False:
         database.guest_vnf_info(vnf, timestamp, vnf_stats)

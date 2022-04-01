@@ -7,6 +7,7 @@ import trace
 import monitor
 import vnf_mgmt
 import database
+import report
 from common import no_workload
 
 def start_sender(g_config, VNFs, protocol, bandwidth):
@@ -122,13 +123,16 @@ def measure_latency(g_config, VNFs, flag):
        
     return
 
-def send_workloads(g_config, config, VNFs, flag):
+def send_workloads(email, g_config, config, VNFs, flag):
     monitor_time = int(g_config["monitor_time"])
     trace_time = int(g_config["trace_time"])
-
+    
+    print("G_CONFIG: ",  g_config)
+    print("CONFIG: ",  config)
+    print("VNFS: ", VNFs)
     protocols = g_config["protocol"].split(",")
     bandwidths = g_config["bandwidth"].split(",")
-
+    #bandwidths = [200]
     for protocol in protocols: # TCP, UDP
         for bandwidth in bandwidths: # 200, 400, 600, 800, 1000 Mbits/s
             vnf_mgmt.initialize_Open_vSwitch(g_config)
@@ -239,5 +243,6 @@ def send_workloads(g_config, config, VNFs, flag):
             #print ("Shut down VNFs")
 
             # ============ #
-
+    #print("REPORT! ", email)
+    report.send_msg(email, "tcpdump")
     return

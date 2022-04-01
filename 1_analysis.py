@@ -75,12 +75,14 @@ def run_analysis(g_config, config, case):
             if common.debug == False:
                 #print("Here!")
                 # send workload (run monitor and trace)
-                workload.send_workloads(g_config, config, case, common.trace_state_transitions)
+                workload.send_workloads(email, g_config, config, case, common.trace_state_transitions)
                 print ("5")
 
 runmode = ""
 num_VNFs = 0
 list_VNFs = ""
+print("Please, enter your email:")
+email = input()
 
 if len(sys.argv) == 2:
     runmode = sys.argv[1]
