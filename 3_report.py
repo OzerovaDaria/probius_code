@@ -8,6 +8,22 @@ import sqlite3
 import util
 from common import analysis_database
 
+
+import smtplib, ssl
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+ 
+fromaddr = "ozerova.daria2016@mail.ru"
+toaddr = "s02190164@gse.cs.msu.ru"
+mypass = "jAu30uKV3epUY0g5hNyK"
+ 
+msg = MIMEMultipart()
+msg['From'] = fromaddr
+msg['To'] = toaddr
+msg['Subject'] = "Fixed problem Probius"
+ 
+body = "Report:\n"
+
 if len(sys.argv) != 2:
     print ("%s [all | testcase]" % (sys.argv[0]))
     exit(0)
@@ -107,13 +123,18 @@ for case in testcases:
 
 conn.close()
 
-print ("testcase | protocol | bandwidth | vnf | " + \
+#print 
+#body = body + "testcase | protocol | bandwidth | vnf | " + "guest_cpu_time | guest_vcpu_time | guest_user_time | guest_system_time | " + "\n" + "host_cpu_percent | host_user_time | host_system_time | " + "host_mem_percent | host_total_mem | host_rss_mem | " + "\n" + "guest_disk_read_count | guest_disk_read_bytes | guest_disk_write_count | guest_disk_write_bytes | " + "recv_pps | recv_Mbps | sent_pps | sent_Mbps | " + "\n" + "num_threads | voluntary_ctx_switch | involuntary_ctx_switch"
+
+'''
+      "testcase | protocol | bandwidth | vnf | " + \
       "guest_cpu_time | guest_vcpu_time | guest_user_time | guest_system_time | " + \
       "host_cpu_percent | host_user_time | host_system_time | " + \
       "host_mem_percent | host_total_mem | host_rss_mem | " + \
       "guest_disk_read_count | guest_disk_read_bytes | guest_disk_write_count | guest_disk_write_bytes | " + \
       "recv_pps | recv_Mbps | sent_pps | sent_Mbps | " + \
       "num_threads | voluntary_ctx_switch | involuntary_ctx_switch")
+'''
 
 for case in results:
     for vnf in results[case]:
@@ -126,7 +147,23 @@ for case in results:
             for key in keylist:
                 bandwidth = str(key)
                 stats = results[case][vnf][protocol][bandwidth]
-
+                
+                body += "testcase: " + case + "\n" + "protocol: " + protocol + "\n" + "bandwidth: " + bandwidth + "\n" + "vnf: " + vnf + "\n"
+                #body += "*" + "\n"
+                #body += "guest_cpu_time: " + stats["g_cpu_time"] + "\n" + "guest_vcpu_time: " + stats["g_vcpu_time"] + "\n" + "guest_user_time: " + stats["g_user_time"] + "\n" + "guest_system_time: " + stats["g_system_time"] + "\n" 
+                #body += "*" + "\n"
+                body += "host_cpu_percent: " + stats["h_cpu_percent"] + "\n" + "host_user_time: " + stats["h_user_time"] + "\n" + "host_system_time: " + stats["h_system_time"] + "\n"
+                #body += "*" + "\n"
+                body += "host_mem_percent: " + stats["h_mem_percent"] + "\n" + "host_total_mem: " + stats["h_total_mem"] + "\n" + "host_rss_mem: " + stats["h_rss_mem"] + "\n"
+                #body += "*" + "\n"
+                body += "guest_disk_read_count: " + stats["g_read_count"]  + "\n" + "guest_disk_read_bytes: " + stats["g_read_bytes"] + "\n" + "guest_disk_write_count: " + stats["g_write_count"] + "\n" + "guest_disk_write_bytes: " + stats["g_write_bytes"] + "\n"
+                #body += "*" + "\n"
+                #body += "recv_pps: " + stats["pps_recv"] + "\n" + "recv_Mbps: " + float(stats["bps_recv"] + "\n" + "sent_pps: " + "1024" + "\n" + "sent_Mbps: " + "1024" + "\n" 
+                body += "num_threads: " + stats["num_threads"] + "\n" + "voluntary_ctx_switch: " +  stats["vol_ctx"] + "\n" + "involuntary_ctx_switch: " + stats["invol_ctx"] + "\n"
+                
+                body += "\n" + "***" + " next testcase " + "***" + "\n"
+                
+                '''
                 print ("%s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s" % \
                       (case, protocol, bandwidth, vnf, \
                        stats["g_cpu_time"], stats["g_vcpu_time"], stats["g_user_time"], stats["g_system_time"], \
@@ -136,4 +173,13 @@ for case in results:
                        float(stats["pps_recv"]), float(stats["bps_recv"]) / 1024. / 1024., \
                        float(stats["pps_sent"]), float(stats["bps_sent"]) / 1024. / 1024., \
                        stats["num_threads"], stats["vol_ctx"], stats["invol_ctx"]))
-
+                '''
+msg.attach(MIMEText(body, 'plain'))
+ 
+server = smtplib.SMTP_SSL('smtp.mail.ru', 465)
+#server.starttls()
+server.ehlo()
+server.login(fromaddr, mypass)
+text = msg.as_string()
+server.sendmail(fromaddr, toaddr, text)
+server.quit()

@@ -135,7 +135,7 @@ for node in proxmoxx.proxmox().nodes.get():
 resp1 = proxmoxx.proxmox().nodes('w4').qemu(210).status.current.get()
 #print("maxmem", resp1["maxmem"])
 b = json.dumps(resp1, indent=2)
-print(b)
+print(resp1["blockstat"]["scsi0"]["rd_operations"])
 print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
