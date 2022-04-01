@@ -13,8 +13,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 
-def send_msg(email, test_case ):
-
+def send_msg(email, test_case, current_bandwidth):
+    print("bandwidth ", current_bandwidth, type(current_bandwidth))
     fromaddr = "ozerova.daria2016@mail.ru"
     toaddr = email  # "s02190164@gse.cs.msu.ru"
     mypass = "jAu30uKV3epUY0g5hNyK"
@@ -142,44 +142,56 @@ def send_msg(email, test_case ):
                 keylist.sort()
                 for key in keylist:
                     bandwidth = str(key)
-                    stats = results[case][vnf][protocol][bandwidth]
-                    critical_metrics = False
-                    if float(stats["h_mem_percent"]) >= cr_cpu_percent:
-                        critical_metrics = True
-                        body += "Percent memory usage exceeded\n\n" 
-
-                    if float(stats["h_cpu_percent"]) >= cr_cpu_percent:
-                        critical_metrics = True
-                        body += "Percent cpu usage exceeded\n\n"
+                    if current_bandwidth != key:
+                        continue
+                    else:
+                        #print("Current bandwidth = ", key, bandwidth)
+                        stats = results[case][vnf][protocol][bandwidth]
+                        critical_metrics = False
+                        #print("MEM ", stats["h_mem_percent"], cr_mem_percent)
+                        if float(stats["h_mem_percent"]) >= cr_cpu_percent:
+                            critical_metrics = True
+                            body += "## Percent memory usage exceeded\n\n" 
+                        #print("CPU ", stats["h_cpu_percent"], cr_cpu_percent)
+                        if float(stats["h_cpu_percent"]) >= cr_cpu_percent:
+                            critical_metrics = True
+                            body += "## Percent cpu usage exceeded\n\n"
  
-                    if critical_metrics:
-                        critical_metrics_fl = True
-                        body += "metric values:\n"
-                        body += "testcase: " + case + "\n" + "protocol: " + protocol + "\n" + "bandwidth: " + bandwidth + "\n" + "vnf: " + vnf + "\n"
+                        if critical_metrics:
+                            #print("TRUE")
+                            critical_metrics_fl = True
+                            body += "metric values:\n"
+                            body += "testcase: " + case + "\n" + "protocol: " + protocol + "\n" + "bandwidth: " + bandwidth + "\n" + "vnf: " + vnf + "\n"
                         # body += "guest_cpu_time: " + stats["g_cpu_time"] + "\n" + "guest_vcpu_time: " + stats["g_vcpu_time"] + "\n" + "guest_user_time: " + stats["g_user_time"] + "\n" + "guest_system_time: " + stats["g_system_time"] + "\n"
-                        body += "host_cpu_percent: " + stats["h_cpu_percent"] + "\n" + "host_user_time: " + stats["h_user_time"] + "\n" + "host_system_time: " + stats["h_system_time"] + "\n"
-                        body += "host_mem_percent: " + stats["h_mem_percent"] + "\n" + "host_total_mem: " + stats["h_total_mem"] + "\n" + "host_rss_mem: " + stats["h_rss_mem"] + "\n"
-                        body += "guest_disk_read_count: " + stats["g_read_count"] + "\n" + "guest_disk_read_bytes: " + stats["g_read_bytes"] + "\n" + "guest_disk_write_count: " + stats[
-                                    "g_write_count"] + "\n" + "guest_disk_write_bytes: " + stats["g_write_bytes"] + "\n"
-                        body += "recv_pps: " + str(float(stats["pps_recv"])) + "\n" + "recv_Mbps: " + str(
-                            float(stats["bps_recv"]) / 1024. / 1024.) + "\n"
-                        body += "sent_pps: " + str(float(stats["pps_sent"])) + "\n" + "sent_Mbps: " + str(
-                            float(stats["bps_sent"]) / 1024. / 1024.) + "\n"
-                        body += "num_threads: " + stats["num_threads"] + "\n" + "voluntary_ctx_switch: " + stats[
-                            "vol_ctx"] + "\n" + "involuntary_ctx_switch: " + stats["invol_ctx"] + "\n"
+                            body += "host_cpu_percent: " + stats["h_cpu_percent"] + "\n" + "host_user_time: " + stats["h_user_time"] + "\n" + "host_system_time: " + stats["h_system_time"] + "\n"
+                            body += "host_mem_percent: " + stats["h_mem_percent"] + "\n" + "host_total_mem: " + stats["h_total_mem"] + "\n" + "host_rss_mem: " + stats["h_rss_mem"] + "\n"
+                            body += "guest_disk_read_count: " + stats["g_read_count"] + "\n" + "guest_disk_read_bytes: " + stats["g_read_bytes"] + "\n" + "guest_disk_write_count: " + stats[
+                                        "g_write_count"] + "\n" + "guest_disk_write_bytes: " + stats["g_write_bytes"] + "\n"
+                            body += "recv_pps: " + str(float(stats["pps_recv"])) + "\n" + "recv_Mbps: " + str(
+                                float(stats["bps_recv"]) / 1024. / 1024.) + "\n"
+                            body += "sent_pps: " + str(float(stats["pps_sent"])) + "\n" + "sent_Mbps: " + str(
+                                float(stats["bps_sent"]) / 1024. / 1024.) + "\n"
+                            body += "num_threads: " + stats["num_threads"] + "\n" + "voluntary_ctx_switch: " + stats[
+                                "vol_ctx"] + "\n" + "involuntary_ctx_switch: " + stats["invol_ctx"] + "\n"
 
-                        body += "\n" + "\n"
+                            body += "\n" + "\n"
+                            
+    #print("BODY: ", body)
 
+    #print("critical_metrics_fl ", critical_metrics_fl)
     msg.attach(MIMEText(body, 'plain'))
     server = smtplib.SMTP_SSL('smtp.mail.ru', 465)
     # server.starttls()
     server.ehlo()
     server.login(fromaddr, mypass)
     text = msg.as_string()
+
     if critical_metrics_fl:
+        #print("server.sendmail ")
+        #    print("server.sendmail ", fromaddr, toaddr, text)
         server.sendmail(fromaddr, toaddr, text)
     server.quit()
 
     return
 
-#send_msg("s02190164@gse.cs.msu.ru", "tcpdump")
+#send_msg("s02190164@gse.cs.msu.ru", "tcpdump", 200)

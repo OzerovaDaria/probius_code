@@ -244,5 +244,5 @@ def send_workloads(email, g_config, config, VNFs, flag):
 
             # ============ #
     #print("REPORT! ", email)
-    report.send_msg(email, "tcpdump")
+            report.send_msg(email, "tcpdump", int(bandwidth))
     return
