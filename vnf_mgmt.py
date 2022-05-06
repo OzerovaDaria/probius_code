@@ -74,22 +74,19 @@ def load_VNF_configurations(conf_file):
 
 def update_VNF_configurations(config):
     
-    config["firewall"]["inbound"] = "1"
-    config["firewall"]["outbound"] = "1"
-    config["netsniff-ng"]["inbound"] = "4"
+    config["firewall"]["inbound"] = "75"
+    config["firewall"]["outbound"] = "76"
+    config["netsniff-ng"]["inbound"] = "49"
     config["netsniff-ng"]["outbound"] = ""
-    config["snort-ids"]["inbound"] = "13"
+    config["snort-ids"]["inbound"] = "51"
     config["snort-ids"]["outbound"] = ""
-    config["suricata-ids"]["inbound"] = "14"
+    config["suricata-ids"]["inbound"] = "52"
     config["suricata-ids"]["outbound"] = ""
-    #config["suricata-ips"]["inbound"] =
-    #config["suricata-ips"]["outbound"] =
+    config["suricata-ips"]["inbound"] ="53"
+    config["suricata-ips"]["outbound"] ="54"
 
-    config["tcpdump"]["inbound"] = "9"
-    config["tcpdump"]["outbound"] = ""
-    #config["NAT"]["inbound"] =
-    #config["NAT"]["outbound"] =
-    
+    config["tcpdump"]["inbound"] = "56"
+    config["tcpdump"]["outbound"] = ""    
     for process in psutil.process_iter():
         try:
             vnf = process.as_dict(attrs=['name', 'pid', 'cmdline'])
@@ -462,7 +459,7 @@ def make_chain_of_VNFs(config, VNFs):
     rule = rule + ",output:LOCAL"
     print("RULE last = ", rule)
     rules.append(rule)
-    rules.append("sudo ovs-ofctl add-flow vmbr0 in_port=LOCAL,actions=output:12,output:10,output:9")
+    rules.append("sudo ovs-ofctl add-flow vmbr0 in_port=LOCAL,actions=output:12,output:10") #,output:" + str(config[vnf]["inbound"]))
     return rules
 
 def initialize_Open_vSwitch(analysis):

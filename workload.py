@@ -127,9 +127,9 @@ def send_workloads(email, g_config, config, VNFs, flag):
     monitor_time = int(g_config["monitor_time"])
     trace_time = int(g_config["trace_time"])
     
-    print("G_CONFIG: ",  g_config)
-    print("CONFIG: ",  config)
-    print("VNFS: ", VNFs)
+    #print("G_CONFIG: ",  g_config)
+    #print("CONFIG: ",  config)
+    #print("VNFS: ", VNFs)
     protocols = g_config["protocol"].split(",")
     bandwidths = g_config["bandwidth"].split(",")
     #bandwidths = [200]
@@ -149,7 +149,8 @@ def send_workloads(email, g_config, config, VNFs, flag):
             config = vnf_mgmt.update_VNF_configurations(config)
             print ("Updated VNF configurations")
 
-            vnf_mgmt.start_applications_in_VNFs(config, VNFs)
+            if bandwidth == '200':
+                vnf_mgmt.start_applications_in_VNFs(config, VNFs)
             print ("Executed applications in VNFs")
 
             rules = vnf_mgmt.make_chain_of_VNFs(config, VNFs)
@@ -236,7 +237,7 @@ def send_workloads(email, g_config, config, VNFs, flag):
 
             # ============ #
 
-            vnf_mgmt.stop_applications_in_VNFs(config, VNFs)
+            #vnf_mgmt.stop_applications_in_VNFs(config, VNFs)
             print ("Terminated applications in VNFs")
             
             #vnf_mgmt.shut_down_VNFs(VNFs)
@@ -244,5 +245,5 @@ def send_workloads(email, g_config, config, VNFs, flag):
 
             # ============ #
     #print("REPORT! ", email)
-            report.send_msg(email, "tcpdump", int(bandwidth))
+#            report.send_msg(email, "tcpdump", int(bandwidth))
     return

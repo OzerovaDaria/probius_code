@@ -218,11 +218,11 @@ def monitor_VNF(config, vnf):
                     vnf_stats["bytes_sent"] = str((net_stats[intf]["bytes_sent"] - guest_vnf_info[vnf]["bytes_sent"])) # \
                                                      #/ (tm - guest_vnf_info[vnf]["time"]))
 
-            if config[vnf]["outbound"] == "": ###
-                guest_vnf_info[vnf]["packets_sent"] = net_stats[intf]["packets_sent"]
-                guest_vnf_info[vnf]["bytes_sent"] = net_stats[intf]["bytes_sent"]
-                vnf_stats["packets_sent"] = net_stats[intf]["packets_sent"]
-                vnf_stats["bytes_sent"] = net_stats[intf]["bytes_sent"]
+            #if config[vnf]["outbound"] == "": ###
+            guest_vnf_info[vnf]["packets_sent"] = net_stats[intf]["packets_sent"]
+            guest_vnf_info[vnf]["bytes_sent"] = net_stats[intf]["bytes_sent"]
+            vnf_stats["packets_sent"] = net_stats[intf]["packets_sent"]
+            vnf_stats["bytes_sent"] = net_stats[intf]["bytes_sent"]
         elif intf == config[vnf]["outbound"]:
             if first == False:
                 vnf_stats["packets_sent"] = str((net_stats[intf]["packets_sent"] - guest_vnf_info[vnf]["packets_sent"])) # \
